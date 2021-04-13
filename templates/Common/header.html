@@ -1,0 +1,195 @@
+<header>
+    <div class="header_logo">
+        <a href="/">
+            <img src="/static/image/logo.jpg" alt="logo">
+        </a>
+    </div>
+    <menu>
+        <span>
+            <a href="/shop">Shop</a>
+            <a href="">Story</a>
+            <a class="collection">
+                <span>Collection</span>
+                <div class="mask"></div>
+                <ul></ul>
+            </a>
+            <a href="/cart">Cart</a>
+            <a href="">Get Help</a>
+        </span>
+    </menu>
+    <div class="user-info">
+        <a href="/login" class="login">Login</a>
+        <a href="/mine" class="name">用户名</a>
+        <span class="logout">Logout</span>
+    </div>
+</header>
+<style>
+    header {
+        height: 60px;
+        line-height: 60px;
+        box-sizing: border-box;
+        background-color: rgb(220, 160, 159);
+        width: 100%;
+        position: relative;
+        z-index: 1000;
+    }
+    /*Style for header logo*/
+    header > div.header_logo {
+        position: absolute;
+        left: 80px;
+        top: 0;
+        width: 70px;
+        height: 70px;
+        display: inline-block;
+        text-align: center;
+        vertical-align: top;
+    }
+
+    header > div.header_logo > a > img{
+        width: 50px;
+        margin: 5px;
+    }   
+    /*Style for menu in header*/
+    header > menu {
+        text-align: center;
+        margin: auto;
+        font-size: 20px;
+        height: 60px;
+        line-height: 60px;
+        flex-direction: row;
+        text-align: center;
+        margin: 0%;
+        padding: 0%;
+    }
+
+    header > menu a {
+        color: white;
+        text-decoration: none;
+        padding: 0 25px;
+    }
+
+    .collection {
+        position: relative;
+        cursor: pointer;
+        height: 60px;
+        line-height: 60px;
+        display: inline-block;
+    }
+
+    .collection .mask {
+        width: 200vw;
+        height: 200vh;
+        position: absolute;
+        top: 60px;
+        left: -800px;
+        z-index: -1;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: none;
+    }
+
+    .collection ul {
+        position: absolute;
+        left: -50px;
+        top: 60px;
+        padding-left: 0;
+        background-color: white;
+        width: 300px;
+        text-align: left;
+        color: #505555;
+        margin: 0;
+        display: none;
+    }
+
+    .collection li {
+        padding-left: 15px;
+        border-bottom: 1px dashed #ddd;
+    }
+
+    .collection li:hover {
+        padding-left: 25px;
+        background-color: #eee;
+    }
+
+    .user-info {
+        position: absolute;
+        right: 80px;
+        color: white;
+        top: 0;
+    }
+
+    .user-info a {
+        text-decoration: none;
+        color: white;
+    }
+
+    .user-info .login {
+        color: #409EFF;
+    }
+
+    .user-info .name {
+        display: none;
+    }
+
+    .user-info .logout {
+        color: orangered;
+        display: none;
+        margin-left: 20px;
+        cursor: pointer;
+    }
+
+    body {
+        margin: 0%;
+    }
+</style>
+
+<script>
+window.addEventListener('load', function () {
+    init();
+});
+
+function init () {
+    var lis = [
+        { name: 'Love flowers', href: 'Love flowers' },
+        { name: 'Friendship flowers', href: 'Friendship flowers' },
+        { name: 'Birthday flowers', href: 'Birthday flowers' },
+        { name: 'Greeting elders', href: 'Greeting elders' },
+        { name: 'Visiting and condolences', href: 'Visiting and condolences' },
+        { name: 'Apology flowers', href: 'Apology flowers' },
+        { name: 'Wedding flowers', href: 'Wedding flowers' },
+        { name: 'recommend', href: 'recommend' }
+    ];
+    var ul = $('.collection ul');
+    for (var i = 0, len = lis.length; i < len; i++) {
+        var li = $('<li>' + lis[i].name + '</li>');
+        li.data('href', lis[i].href);
+        li.click(function () {
+            var href = $(this).data('href');
+            window.location.href = window.location.origin + '/category?name=' + href;
+        });
+        ul.append(li);
+    }
+
+    var user = JSON.parse(window.sessionStorage.getItem('userInfo') || 'null');
+    if (user) {
+        $('.user-info .login').css('display', 'none');
+        $('.user-info .name').css('display', 'inline-block').text(user.name);
+
+        $('.user-info .logout').css('display', 'inline-block').click(function () {
+            window.sessionStorage.removeItem('token');
+            window.sessionStorage.removeItem('userInfo');
+            window.location.href = window.location.origin + '/login';
+        });
+    }
+
+    $('header .collection span').mouseover(function (e) {
+        $('header .collection .mask').css('display', 'block');
+        $('header .collection ul').css('display', 'block');
+    });
+
+    $('header .collection .mask').mouseover(function (e) {
+        $('header .collection .mask').css('display', 'none');
+        $('header .collection ul').css('display', 'none');
+        e.stopPropagation();
+    });
+}
+</script>

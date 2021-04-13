@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type=text/javascript src="{{url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='style/style.css') }}">
+    <title>Five Blue Petals | Admin</title>
+</head>
+<body>
+    <div class="warning_area none"></div>
+    <form class = "login_form" action="">
+        <label for="admin">Admin Account</label>
+        <input type="text" name="admin_username" id="admin_username" placeholder="Enter your email">
+        <label for="admin">Password</label>
+        <input type="password" name="password" id="password" placeholder="Enter your password">
+        <button type="button" onclick="admin_login()">Login</button>
+    </form>
+</body>
+</html>
+
+<script>
+    function addCookies(key,value){
+        document.cookie = key+"="+value+";"
+        console.log(document.cookie);
+    }
+
+
+    function getCookies(key){
+        var name = key+"=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var value = decodedCookie.split(';');
+        for(var i = 0; i <value.length; i++) {
+            var c = value[i];
+            while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+            }
+        }
+        return "";        
+    }
+    function admin_login() {
+        var username = document.getElementById("admin_username").value;
+        var password = document.getElementById("password").value;
+
+        var data = new FormData();
+        data.append("email",username);
+        data.append("password",password);
+        data = new URLSearchParams(data).toString();
+        var response = parseData(sendRequest("/admin_login",data,"POST"),"json");
+        if(response['result']=="ERROR"){
+            var warnning_area = document.getElementsByClassName("warning_area")[0];
+            warnning_area.innerHTML = response['reason'];
+            warnning_area.classList.remove("none");
+            setTimeout(() => {warnning_area.innerHTML = "";warnning_area.classList.add("none")},2000);
+        } else {
+            var token = response['token'];
+            console.log(token);
+            addCookies("token",token);
+            window.location.href="/admin_portal?token="+getCookies("token");
+        }
+    }
+</script>
+
+<style>
+    body{
+        background: linear-gradient(to right, #0C4842,#58B2DC,#0C4842);
+    }
+</style>

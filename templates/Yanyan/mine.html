@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine</title>
+    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
+    <link rel="icon" href="../../static/img/favicon.png" />
+    <script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../../static/js/axios.min.js"></script>
+    <script type="text/javascript" src="../../static/js/qs.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+        .home-body {
+            background-image: url(img/主页背景.jpg);
+        }
+        .mine {
+            width: 600px;
+            margin: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            min-height: 300px;
+        }
+        .field {
+            display: flex;
+            font-size: 20px;
+            border-bottom: 1px solid #eee;
+            padding: 30px 0;
+            position: relative;
+            align-items: center;
+        }
+        .field .label {
+            flex: 1;
+            color: #606666;
+        }
+        .field .value {
+            text-align: right;
+            flex: 3;
+            color: #303333;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid skyblue;
+        }
+        .inputer {
+            position: absolute;
+            right: 0;
+            border: 1px solid #409EFF;
+            background-color: white;
+            border-radius: 4px;
+            padding: 0 10px;
+            outline: none;
+            width: 200px;
+            height: 40px;
+            display: none;
+        }
+        .operation {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .edit, .cancel {
+            background-color: #409EFF;
+            color: white;
+            width: 100px;
+            text-align: center;
+            padding: 8px 25px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .cancel {
+            background-color: white;
+            color: #409EFF;
+            border: 1px solid #409EFF;
+        }
+        .edit:hover {
+            opacity: 0.8;
+        }
+        .cancel:hover {
+            background-color: #409EFF;
+            opacity: 0.5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="home-body">
+{% include "Common/header.html" %}
+
+<div class="mine">
+    <div class="field">
+        <span class="label">Nickname: </span>
+        <span class="value">Michael</span>
+        <input type="text" class="inputer" id="nick_name">
+    </div>
+    <div class="field">
+        <span class="label">First name: </span>
+        <span class="value">Michael</span>
+        <input type="text" class="inputer" id="first_name">
+    </div>
+    <div class="field">
+        <span class="label">Last name: </span>
+        <span class="value">Michael</span>
+        <input type="text" class="inputer" id="last_name">
+    </div>
+    <div class="field">
+        <span class="label">Email: </span>
+        <span class="value">123@qq.com</span>
+        <input type="text" class="inputer" id="email">
+    </div>
+    <div class="operation">
+        <div class="edit">Edit profile</div>        
+        <div class="cancel">Cancel</div>        
+    </div>
+</div>
+
+<script>
+$(function () {
+    $('.mine .edit').click(function () {
+        if ($(this).text() == 'Edit profile') {
+            $('.mine .field .inputer').css('display', 'inline-block');
+            $('.mine .field .value').css('display', 'none');
+            $(this).text('Submit');
+        } else {
+            var fields = ['nick_name', 'first_name', 'last_name', 'email'];
+            var params = { };
+            for (var key of fields) {
+                console.log(key)
+                var input = $('#' + key);
+                params[key] = input.val();
+            }
+            console.log(params)
+            console.log('0000000000000')
+            var user = JSON.parse(window.sessionStorage.getItem('userInfo') || 'null');
+            var userId = user.id;
+            // 后端要写这个接口，修改个人信息
+            // userId, 还有表单
+            axios.post(window.location.origin + '/update_profile?userId=' + userId, Qs.stringify(params), {
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                }
+            }).then(function (res) {
+                if (res.data.reason) {
+                    alert(res.data.reason);
+                } else {
+                    alert('update profile success');
+                }
+            });
+
+            resetForm();
+        }
+    });
+    $('.mine .cancel').click(function () {
+        $('.mine .edit').text('Edit profile');
+        resetForm();
+        $('.mine .field .inputer').css('display', 'none');
+        $('.mine .field .value').css('display', 'inline-block');
+    });
+
+    function resetForm () {
+        var fields = ['nick_name', 'first_name', 'last_name', 'email'];
+        for (var key of fields) {
+            $('#' + key).val('');
+        }
+    }
+});
+</script>
+</body>
+</html>

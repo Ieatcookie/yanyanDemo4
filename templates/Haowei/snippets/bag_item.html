@@ -1,0 +1,54 @@
+<div class="bag_items">
+    <div class="bag_item">
+        <div class="bag_item_image_wrapper">
+            <img src="/static/image/product_image/10/0.jpg" alt="">
+        </div>
+        <div class="bag_item_detail">
+            <div class="product_description">
+                <span>Flower 1</span><span>$100</span>
+                <a>remove</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+</div>
+
+<style>
+div.bag_item > div.bag_item_image_wrapper {
+    width: 30%;
+    overflow: hidden;
+}
+
+div.bag_item > div.bag_item_image_wrapper > img {
+    width: 100%;
+}
+
+div.bag_item > div.bag_item_detail {
+    width: 70%;
+}
+
+div.bag_item > div.bag_item_detail > div.product_description {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 5% 0 2%;
+    position: relative;
+}
+
+div.bag_item > div.bag_item_detail > div.product_description span{
+    display: inline-block;
+    width: 50%;
+}
+
+div.bag_item > div.bag_item_detail > div.product_description span:nth-of-type(2){
+    text-align: right;
+}
+
+div.bag_item > div.bag_item_detail >  div.product_description > a{
+    position: absolute;
+    left: 2%;
+    bottom: 0;
+}
+
+
+</style>

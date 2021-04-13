@@ -1,0 +1,89 @@
+<h1 class="title">Order</h1>
+<table class="manage_products">
+    <tr style="vertical-align: baseline;">
+        <td>id</td>
+        <td>customer</td>
+        <td>products</td>
+        <td>address</td>
+        <td>status</td>
+        <td>manage</td>
+    </tr>
+    
+    {% for order in orders %}
+        <tr>
+            <td>{{order['id']}}</td>
+            <td class="customer" onclick="updateSection('manageCustomer?id={{order['customer']['id']}}')">{{order['customer']['name']}}</td>
+            <td>
+                {% for product in order['products'] %}
+                    <span style="cursor: pointer;" onclick="updateSection('manageProduct?id={{product['product_ID']}}')">
+                        {{product['title']}}
+                    </span>
+                    ,
+                {% endfor %}
+            </td>
+            <td>{{order['shippingAddress']}}</td>
+            <td>{{order['status']}}</td>
+            <td>
+                <div class="manageButton" onclick="updateSection('manageOrder?id={{order['id']}}')">
+                    >
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<style>
+    td.customer {
+        cursor: pointer;
+        background: white;
+        color: black;
+        transition: 2s;
+    }
+
+    td.customer:hover {
+        background: black;
+        color: white;
+        transition: 2s;
+    }
+    div.manageButton {
+        width: 60px;
+        height: 40px;
+        font-size: 2em;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        cursor: pointer;
+    }
+    h1.title {
+        font-size: 2em;
+        color: silver;
+        font-weight: 200;
+    }
+    table.manage_products {
+        width: 100%;
+        height: 100%;
+    }
+    tr > td > div.image_wrapper {
+        width: 12vw;
+        height: 12vw;
+        overflow: hidden;
+        border-radius: 50%;
+    }
+    
+    tr {
+        margin: 0 0 10vh 0;
+    }
+    
+    div.image_wrapper > img{
+        width: 100%;
+    }
+
+    td > span:hover {
+        background: darkblue;
+        color: white;
+        transition: 2s;
+    }
+    td > span {
+        background: white;
+        color: black;
+        transition: 2s;
+    }
+</style>

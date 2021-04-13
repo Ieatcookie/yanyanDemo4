@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<title>Product Detail</title>
+	<link rel="icon" href="../../static/img/favicon.png">
+    <link rel="stylesheet" type="text/css" href="webbase.css" />
+    <link rel="stylesheet" type="text/css" href="pages-item.css" />
+    <link rel="stylesheet" type="text/css" href="pages-zoom.css" />
+    <link rel="stylesheet" type="text/css" href="widget-cartPanelView.css" />
+    <link rel="stylesheet" href="../../static/layui/css/layui.css">
+
+	<style type="text/css">
+		.product-detail {
+			width: 960px;
+			margin: 20px auto;
+			position: relative;
+			display: flex;
+		}
+		.left {
+			width: 400px;
+			display: inline-block;
+			padding-right: 20px;
+			box-sizing: border-box;
+		}
+		.img-container {
+			width: 360px;
+			width: 100%;
+			margin-bottom: 10px;
+			position: relative;
+		}
+		.img-container .mask {
+			display: none;
+			width: 180px;
+			height: 180px;
+			background-color: rgba(0, 0, 255, 0.3);
+			position: absolute;
+			left: 0;
+			top: 0;
+			cursor: pointer;
+		}
+		.img-container img {
+			width: 100%;
+			cursor: pointer;
+		}
+		.spot-container {
+			position: absolute;
+			width: 480px;
+			height: 500px;
+			left: 380px;
+			top: 0;
+			display: none;
+			overflow: hidden;
+			z-index: 1000;
+			background-repeat: no-repeat;
+			background-size: 200% 200%;
+			background-position: 0 0;
+		}
+		.left .bottom img {
+			display: inline-block;
+			width: 50px;
+			height: 70px;
+			margin-right: 10px;
+			border: 2px solid maroon;
+			cursor: pointer;
+		}
+		.left .bottom img:hover {
+			opacity: 0.8;
+		}
+		.right {
+			width: 600px;
+			display: inline-block;
+			padding-left: 20px;
+			box-sizing: border-box;
+		}
+		.right .header {
+			height: 40px;
+			line-height: 40px;
+			margin-bottom: 20px;
+		}
+		.right .name {
+			font-size: 30px;
+			color: rgb(220, 160, 159);
+			font-weight: 500;
+		}
+		.right .price {
+			float: right;
+			color: #606666;
+			font-size: 20px;
+		}
+		.right .usage {
+			margin-bottom: 20px;
+			font-size: 18px;
+			color: #505555;
+		}
+		.right .description {
+			font-size: 16px;
+			color: #606666;
+			font-family: "Gentium Book Basic", sans-serif;
+		}
+		.right .add-container {
+			margin: 20px 0;
+		}
+		.right .inputer {
+			width: 80px;
+			height: 48px;
+			position: relative;
+			display: inline-block;
+			border: 2px solid #e8e8e8;
+		}
+		.right .inputer input {
+			width: 60px;
+			height: 48px;
+			border: 0;
+			padding-left: 5px;
+			font-size: 18px;
+			text-align: center;
+		}
+		.right .tool {
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: 30px;
+			height: 48px;
+			display: flex;
+			flex-direction: column;
+			background-color: #e8e8e8;
+		}
+		.right .tool div {
+			flex: 1;
+			border-bottom: 2px solid #dedede;
+			text-align: center;
+			line-height: 20px;
+			cursor: pointer;
+		}
+		.right .tool div:hover {
+			background-color: rgb(225, 161, 159);
+			color: white;
+		}
+		.right .tool .sub {
+			border-bottom: 0;
+		}
+		.right .add-to-cart {
+			font-family: "Gentium Book Basic", sans-serif;
+			background-color: #d9576a;
+			font-size: 18px;
+			height: 52px;
+			line-height: 52px;
+			width: 180px;
+			text-align: center;
+			color: white;
+			display: inline-block;
+			cursor: pointer;
+		}
+		.right .add-to-cart:hover {
+			opacity: 0.8;
+		}
+	</style>
+</head>
+
+<body>
+{% include "Common/header.html" %}
+
+<div class="product-detail">
+	<div class="left">
+		<div class="img-container">
+			<img src="">
+			<div class="mask"></div>
+		</div>
+		<div class="bottom"></div>
+	</div>
+	<div class="spot-container"></div>
+	<div class="right">
+		<div class="header">
+			<span class="name"></span>
+			<span class="price"></span>
+		</div>
+		<div class="info">
+			<p class="usage"></p>
+			<p class="description"></p>
+			<div class="add-container">
+				<div class="inputer">
+					<input type="number" min="0">
+					<div class="tool">
+						<div class="add">+</div>
+						<div class="sub">-</div>
+					</div>
+				</div>
+				<div class="add-to-cart">
+					Add to cart					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="nav-bottom"></div>
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../../static/js/axios.min.js"></script>
+<script type="text/javascript" src="../../static/js/qs.min.js"></script>
+<script>
+$(function () {
+	getProduct();
+
+	var input = $('.add-container input');
+	input.val(1);
+
+	$('.add-container .add').click(function () {
+		input.val(input.val() * 1 + 1);
+	});
+
+	$('.add-container .sub').click(function () {
+		var number = input.val() * 1 - 1;
+		if (number < 0) {
+			number = 0;
+		}
+		input.val(number);
+	});
+
+	$('.add-to-cart').click(function () {
+		var number = input.val();
+	});
+});
+
+var data = { };
+var product = { };
+
+function getProduct () {
+	axios.post(window.location.origin + '/get_product_by_id', Qs.stringify({
+        id: getQuery('productId')
+    }), {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+    }).then(function (res) {
+        product = res.data.products[0];
+        renderProductInfo();
+    });
+}
+
+function renderProductInfo () {
+	var container = $('.product-detail');
+	container.find('.left .img-container img').attr('src', window.location.origin + product.image[0]);
+	container.find('.spot-container').css('background-image', 'url(' + window.location.origin + product.image[0] + ')');
+	container.find('.name').text(product.title);
+	container.find('.price').text('$' + product.price);
+	container.find('.usage').text(product.usage.join(' | '));
+	container.find('.description').text(product.description);
+
+	for (var i = 0, len = product.image.length; i < len; i++) {
+		var img = $('<img src="' + (window.location.origin + product.image[i]) + '"></img>');
+		img.click(function () {
+			container.find('.bottom img.active').removeClass('active');
+			$(this).addClass('active');
+			$('.left .img-container img').attr('src', $(this).attr('src'));
+			$('.spot-container').css('background-image', 'url(' + window.location.origin + product.image[0] + ')');
+		});
+		container.find('.bottom').append(img);
+	}
+
+	var rect = $('.img-container')[0].getBoundingClientRect();
+	var maskWidth = rect.width / 2;
+	var maskHeight = rect.width / 2;
+	var spotWidth = rect.width * 1.5;
+	var spotHeight = rect.height * 1.5;
+
+	$('.img-container .mask').css({
+		width: maskWidth + 'px',
+		height: maskHeight + 'px'
+	});
+
+	$('.spot-container').css({
+		width: spotWidth + 'px',
+		height: spotHeight + 'px'
+	});
+
+	$('.img-container').mouseover(function () {
+		$('.spot-container').css('display', 'block');
+		$('.img-container .mask').css('display', 'block');
+	});
+	$('.img-container').mousemove(function (e) {
+		var conRect = $('.img-container')[0].getBoundingClientRect();
+		var centerX = e.pageX - conRect.left;
+		var centerY = e.pageY - conRect.top;
+		var left = centerX - maskWidth / 2;
+		var top = centerY - maskHeight / 2;
+		if (left < 0) {
+			left = 0;
+		}
+		if (top < 0) {
+			top = 0;
+		}
+		if (left >= rect.width - maskWidth) {
+			left = rect.width - maskWidth;
+		}
+		if (top >= rect.height - maskHeight) {
+			top = rect.height - maskHeight;
+		}
+		$('.img-container .mask').css({
+			left: left + 'px',
+			top: top + 'px'
+		});
+		var backLeft = left / rect.width * 100;
+		var backTop = top / rect.height * 100;
+		$('.spot-container').css({
+			backgroundPosition: backLeft + '% ' + backTop + '%'
+		});
+	});
+	$('.img-container').mouseout(function (e) {
+		$('.spot-container').css('display', 'none');
+		$('.img-container .mask').css('display', 'none');
+	});
+}
+
+function getQuery (name) {
+	var search = window.location.search.slice(1);
+	var parts = search.split('&');
+	var query = { };
+	for (var i = 0, len = parts.length; i < len; i++) {
+		var kv = parts[i].split('=');
+		query[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+	}  
+	return query[name];
+}
+
+</script>
+</body>
+</html>

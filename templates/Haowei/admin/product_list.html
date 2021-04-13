@@ -1,0 +1,53 @@
+<h1 class="title">Products</h1>
+<table class="manage_products">
+    <tr style="vertical-align: baseline;">
+        <td>id</td>
+        <td>image</td>
+        <td>title</td>
+        <td>stock</td>
+        <td>price</td>
+        <td>visible</td>
+    </tr>
+    
+    {% for product in products %}
+        <tr onclick="updateSection('manageProduct?id={{product['product_ID']}}')">
+            <td>{{product['product_ID']}}</td>
+            <td>
+                <div class="image_wrapper">
+                    <img src='{{product['image'][0]}}' alt="">
+                </div>
+            </td>
+            <td>{{product['title']}}</td>
+            <td>{{product['stock']}}</td>
+            <td>{{product['price']}}</td>
+            <td>True</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<style>
+    h1.title {
+        font-size: 2em;
+        color: silver;
+        font-weight: 200;
+    }
+    table.manage_products {
+        width: 100%;
+        height: 100%;
+    }
+    tr > td > div.image_wrapper {
+        width: 12vw;
+        height: 12vw;
+        overflow: hidden;
+        border-radius: 50%;
+    }
+    
+    tr {
+        margin: 0 0 10vh 0;
+        cursor: pointer;
+    }
+    
+    div.image_wrapper > img{
+        width: 100%;
+    }
+</style>

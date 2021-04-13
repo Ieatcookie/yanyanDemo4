@@ -1,0 +1,46 @@
+<h1 class="title">Customer</h1>
+<table class="manage_customer">
+    <tr style="vertical-align: baseline;">
+        <td>id</td>
+        <td>Customer name</td>
+        <td>Email</td>
+        <td>Phone</td>
+        <td>Address</td>
+    </tr>
+    
+    {% for customer in customers %}
+        <tr onclick="updateSection('manageCustomer?id={{customer['id']}}')">
+            <td>{{customer['id']}}</td>
+            <td>{{customer['name']}}</td>
+            <td>{{customer['email']}}</td>
+            <td>{{customer['phone']}}</td>
+            <td>{{customer['address']}}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<style>
+    h1.title {
+        font-size: 2em;
+        color: silver;
+        font-weight: 200;
+    }
+    table.manage_customer {
+        width: 100%;
+        border-collapse: collapse;
+        
+        height: 100%;
+    }
+    
+    tr {
+        margin: 0 0 10vh 0;
+        cursor: pointer;
+        padding: 0;
+        vertical-align: baseline;
+        max-height: 60px;
+    }
+    
+    div.image_wrapper > img{
+        width: 100%;
+    }
+</style>

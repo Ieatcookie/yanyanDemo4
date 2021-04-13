@@ -1,0 +1,161 @@
+<div class="content_wrapper">
+    <div class="left_column">
+        <div class="product_info">
+            <h1>Order info</h1>
+            <form>
+                <label for="id">Id</label>
+                <div class = "value" id="id">{{order['id']}}</div>
+                <label for="email">Email</label>
+                <div class = "value">{{order['customer']['email']}}</div>
+                <label for="phone">Phone</label>
+                <div class = "value">{{order['customer']['phone']}}</div>
+                <label for="address">Ship Address</label>
+                <div class = "value">{{order['shippingAddress']}}</div>
+                <label for="tracknumber">Track number</label>
+                <input class = "value" id = "tracking" value="{{order['tracking']}}">
+                <button onclick="sendOrder()">Ship</button>
+                <label for="address">Status</label>
+                <div class="value" style="font-weight: 800;font-size: 1.5em;">
+                    {% if order['status'] == "shipped" %}
+                        <span style="color: green;">{{order['status']}}</span>
+                    {% elif order['status'] == "cancelled" %}
+                        <span style="color: red;">{{order['status']}}</span>
+                    {% else %}
+                        <span style="color: yellowgreen;">{{order['status']}}</span>
+                    {% endif %}
+                </div>
+            </form>
+            
+        </div>
+    </div>
+    <div class="right_column">
+        <div class="collections">
+            <h1>Products</h1>
+            <ul>
+                {% for i in range(order['products']|length) %}
+                    {% set product = order['products'][i] %}
+                    {% set number = order['quantity'][i] %}
+                    <li><a class="productlink" style="margin:0 10px" onclick="updateSection('manageProduct?id={{product['product_ID']}}')">{{product['title']}} &times; {{number}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="collections">
+            <h1>Customer</h1>
+            <label for="name">Name</label>
+            <div class = "customer value" style="cursor: pointer;" onclick="updateSection('manageCustomer?id={{order['customer']['id']}}')">{{order['customer']['name']}}</div>
+            <label for="address">Bill Address</label>
+            <div class = "value">{{order['billingAddress']}}</div>
+        </div>
+    </div>
+
+    <div class="stop" onclick="cancelOrder('{{order['id']}}')">Cancel this order</div>
+</div>
+
+<style>
+
+    div.stop {
+        width: 100%;
+        font-size: 2em;
+        line-height: 2em;
+        border-radius: 5vw;
+        background: tomato;
+        color: white;
+        cursor: pointer;
+        text-align: center;
+
+    }
+
+    div.content_wrapper {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        gap: 2%;
+        padding: 1.5% 2%;
+    }
+
+    div.content_wrapper > div.left_column {
+        width: 65%;
+        box-sizing: border-box;
+        /*background: silver;*/
+    }
+    div.content_wrapper > div.right_column {
+        width: 33%;
+        box-sizing: border-box;
+    }
+    
+    div.content_wrapper h1 {
+        font-size: 1.5em;
+        font-weight: 200;
+        line-height: 3em;
+        border-bottom: solid black 1px;
+    }
+
+    div.content_wrapper h2 {
+        font-size: 1.2em;
+        font-weight: 200;
+        line-height: 2.1em;
+    }
+
+    div.product_info, div.collections, div.stops {
+        height: fit-content;
+        box-sizing: border-box;
+        box-shadow: 10px 10px 20px silver;
+        padding: 3vh;
+        border-radius: 5vw;
+        margin: 5vh auto;
+    }
+
+    form {
+        margin: 0 0 0 2%;
+    }
+
+    form label {
+        font-size: 1em;
+        font-weight: 100;
+        margin: 0 0 4px 0;
+        display: block;
+    }
+
+    form input[type=text] {
+        width: 60%;
+        height: 30px;
+        font-size: 1em;
+        font-weight: 100;
+        margin: 0 0 20px 0;
+        display: inline-block;
+        outline: none;
+        border-radius: 4px;
+        border: powderblue 2px solid;
+    }
+
+    form textarea[name=description] {
+        width:90%;
+        height: 240px;
+        margin: 0 0 20px 0;
+        display: inline-block;
+        outline: none;
+        border-radius: 4px;
+        border: powderblue 2px solid;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .value {
+        margin: 5px 0 20px 0;
+    }
+
+    a.productlink, div.customer {
+        cursor: pointer;
+        background: white;
+        color: black;
+        transition: 2s;
+    }
+    a:hover,div.customer:hover {
+        cursor: pointer;
+        background: black;
+        color: white;
+        transition: 2s;
+    }
+</style>

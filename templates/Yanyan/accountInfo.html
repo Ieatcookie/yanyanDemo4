@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="../../static/layui/css/layui.css">
+    <link rel="icon" href="../../static/img/favicon.png" />
+    <style>
+        .laut-main {
+            width: 80%;
+            height: 780px;
+            position: absolute;
+            left: 10%;
+            top: 10%;
+        }
+
+        .laut-left {
+            width: 76%;
+            height: 94%;
+            position: relative;
+            left: 2%;
+            top: 3%;
+            border: 1px solid #f2f2f2;
+            float: left;
+        }
+
+        .laut-right {
+            width: 18%;
+            height: 94%;
+            position: relative;
+            left: 5%;
+            top: 3%;
+            border: 1px solid #f2f2f2;
+            float: left;
+        }
+        .touxian {
+            position: relative;
+            left: 6%;
+            top: 3%;
+            float: left;
+        }
+        #touxian:hover {
+            transform: rotateX(360deg);
+        }
+
+        .user {
+            position: relative;
+            left: 9%;
+            top: 3%;
+            float: left;
+        }
+        html {
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            font-size: 62.5%;
+        }
+        div {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<div id="nav-bottom"></div>
+<script type="text/javascript">$("#nav-bottom").load("top.html");</script>
+
+    <div class="laut-main">
+        <div class="laut-left">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title">
+                  <li class="layui-this">Shipping now</li>
+                  <li>Shipped</li>
+                </ul>
+                <div class="layui-tab-content"></div>
+            </div> 
+            <table id="demo" lay-filter="test"></table>  
+        </div>
+        <div class="laut-right">
+             <div class="touxian">
+                 <img id="touxiang" style="width: 100px;height: 100px;" alt="头像" src="../../static/img/ariti.jpg"/>
+             </div>
+             <div class="user">
+                nickname：<label>five blue petals</label> <br>
+                birthday：<label>2021-03-15</label><br>
+             </div>
+        </div>
+    </div>
+
+    <script src="../../static/layui/layui.js"></script>
+    <script>
+        layui.use('table', function(){
+          var table = layui.table;
+          
+          table.render({
+            elem: '#demo'
+            ,height: 312
+            ,url: '/demo/table/user/'
+            ,page: true 
+            ,cols: [[ 
+              {field: 'Shipping id', title: 'Shipping index', width:80, sort: true, fixed: 'left'}
+              ,{field: 'Shipping Status', title: Shipping Status', width:80},
+              
+            ]]
+          });
+          
+        });
+        </script>
+</body>
+</html>

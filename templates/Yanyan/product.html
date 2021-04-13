@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
+    <link rel="icon" href="../../static/img/favicon.png" />
+</head>
+<style>
+    .laut-main {
+        width: 100%;
+        position: relative;
+    }
+    .collection-list {
+        width: 90%;
+        margin: 10% auto;
+    }
+
+    .collection-list .filters {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .filters select {
+        outline: none;
+        width: 120px;
+        height: 30px;
+        border-radius: 4px;
+        padding: 0 5px;
+        border: 1px solid #409EFF;
+        color: #303333;
+        font-synthesis: 16px;
+    }
+
+    .filters select:hover {
+        background-color: #409EFF;
+        opacity: 0.6;
+        color: white;
+    }
+
+    .filters .sort {
+        width: 120px;
+        height: 30px;
+        box-sizing: border-box;
+        border-radius: 4px;
+        position: relative;
+        top: 1px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 0 10px;
+        border: 1px solid #409EFF;
+        cursor: pointer;
+    }
+
+    .filters .sort span {
+        flex: 1;
+        height: 30px;
+        line-height: 28px;
+    }
+
+    .filters .sort span.active {
+        background-color: #409EFF;
+        color: white;
+    }
+
+    .collection-list .pagination {
+        width: 100%;
+        margin: 20px 0;
+        font-size: 16px;
+    }
+
+    .collection-list .pagination span {
+        display: inline-block;
+        margin: 0 5px;
+        cursor: pointer;
+        border: 1px solid #409EFF;
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    .collection-list .pagination span.active, .collection-list .pagination span:hover {
+        background-color: #409EFF;
+        color: white;
+    }
+
+    .collection-li{
+        width: 30%;
+        height: 300px;
+        border-width: 1px 1px 1px 1px;
+        border-style: solid; 
+        border-color: #64dcdc #64dcdc #64dcdc #64dcdc;
+        float: left;
+        margin-top: 5%
+    }
+    collection-line {
+        width: 20%;
+    }
+    .search-input {
+        width: 30%;
+        height: 50px;
+        padding-left: 35%;
+        position: relative;
+    }
+
+    .input {
+            outline: none;
+            box-sizing: border-box;
+            width: 300px;
+            vertical-align: middle;
+            font-size: 100%;
+            height: 100%;
+            border: 1px solid #f2f2f2;
+            border-radius: 10px;
+            background-color: #fff;
+            position: absolute;
+            left: 65%;
+            padding-left: 20px;
+            z-index: 10;
+    }
+
+    .mobileIcon {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+            position: relative;
+            top: 100%;
+    }
+
+    .pc-search-items-list {
+        width: 100%;
+        font-size: 0;
+        font-family: 'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',sans-serif;
+        border-top: 1px solid #f2f2f2;
+        border-left: 1px solid #f2f2f2;
+    }
+    ul {
+       list-style: none;
+       margin: 0;
+       padding: 0;
+    }
+    .pc-search-items-list .pc-items-item {
+        width: 236px;
+        height: 368px;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: 12px;
+        border: 1px solid #f2f2f2;
+        border-top: none;
+        border-left: none;
+        background: #fff;
+        vertical-align: top;
+    }
+    li {
+        display: list-item;
+        text-align: -webkit-match-parent;
+    }
+
+    li a {
+        text-decoration: none;
+    }
+
+    .pc-search-items-list .pc-items-item-img {
+        width: 198px;
+        height: 198px;
+    }
+
+    .pc-search-items-list .pc-items-item-a {
+        display: inline-block;
+        width: 234px;
+        height: 366px;
+        box-sizing: border-box;
+        padding: 22px 20px 0;
+        background: #fff;
+        position: relative;
+    }
+    .pc-search-items-list img {
+        border: 0 none;
+        width: auto\9;
+        height: auto;
+        max-width: 100%;
+        vertical-align: top;
+        -ms-interpolation-mode: bicubic;
+    }
+.pc-search-items-list .pc-items-item-title.pc-items-item-title-row2 {
+    margin-top: 10px;
+    height: 20px;
+    color: pink;
+    font-size: 20px;
+    text-decoration: none;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.pc-search-items-list .pc-items-item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #9b9b9b;
+    line-height: 20px;
+    padding-top: 10px;
+}
+div {
+    display: block;
+}
+.pc-search-items-list .price-con {
+    height: 25px;
+    padding: 6px 0 0;
+    line-height: 1.6;
+}
+.pc-search-items-list .price-con .coupon-price-title {
+    vertical-align: baseline;
+    font-family: PingFangSC-Medium;
+    font-size: 18px;
+    color: #505555;
+}
+.pc-search-items-list .price-con .coupon-price-afterCoupon {
+    margin-left: 4px;
+    vertical-align: baseline;
+    text-align: left;
+    line-height: 25px;
+    font-family: PingFangSC-Medium;
+    font-size: 18px;
+    color: #505555;
+}
+.pc-search-items-list .price-con .coupon-price-old {
+    margin-left: 8px;
+    vertical-align: baseline;
+    text-decoration: line-through;
+    line-height: 20px;
+    font-family: PingFangSC-Regular;
+    font-size: 14px;
+    color: #9b9b9b;
+}
+html {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+@keyframes scaleDraw {  /*定义关键帧、scaleDrew是需要绑定到选择器的关键帧名称*/
+            0%{
+                transform: scale(1);  /*开始为原始大小*/
+            }
+            25%{
+                transform: scale(1.1); /*放大1.1倍*/
+            }
+            50%{
+                transform: scale(1);
+            }
+            75%{
+                transform: scale(1.1);
+            }
+}
+a:hover img{
+    -webkit-animation-name: scaleDraw; 
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-iteration-count: infinite;  
+    -webkit-animation-duration: 5s; 
+}
+
+.product-template {
+    margin-right: 3px;
+    margin-bottom: 5px;
+}
+
+li {
+    position: relative;
+    overflow: visible;
+    text-align: center;
+}
+
+.item-footer {
+    margin-top: 15px;
+}
+
+.add-container {
+    position: absolute;
+    width: calc(100% + 1px);
+    text-align: center;
+    left: -2px;
+    bottom: -40px;
+    background-color: white;
+    padding-bottom: 20px;
+    display: none;
+    z-index: 1000;
+    border: 2px solid #eee;
+    border-top: 0;
+}
+
+li:hover {
+    box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+li:hover .add-container {
+    display: block;
+}
+
+.add-to-cart {
+    background-color: rgb(225, 161, 159);
+    color: white;
+    width: 86%;
+    margin: auto;
+    height: 50px;
+    line-height: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    opacity: 0.8;
+}
+.add-to-cart:hover {
+    opacity: 1;
+}
+</style>
+<body>
+{% include "Common/header.html" %}
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../../static/js/axios.min.js"></script>
+<script type="text/javascript" src="../../static/js/qs.min.js"></script>
+
+<div id="nav-bottom"></div>
+<script type="text/javascript">$("#nav-bottom").load("top.html");</script>
+<div class="laut-main">
+    <div class="search-input">
+        <div class="mobileIcon">
+            <a>
+                <img alt="search" style="width: 52px;height: 52px;" src="../../static/img/serch.png">
+            </a>
+        </div>
+        <input class="input" type="text" name="keyword" id="keyword" required  lay-verify="required" placeholder="Please enter keyword" autocomplete="off" class="layui-input">
+    </div>
+    
+    <div class="collection-list">
+        <div class="filters">
+            <select id="filter">
+                <option selected label="price">price</option>
+                <option label="title">title</option>
+                <option label="stock">stock</option>
+            </select>
+            <div class="sort">
+                <span class="asc">asc</span>
+                <span class="desc">desc</span>
+            </div>
+        </div>
+
+        <ul class="pc-search-items-list"></ul>
+
+        <div class="pagination"></div>
+    </div>
+</div>
+
+<div class="product-template" style="display: none;">
+    <li class="pc-items-item item-undefined">
+        <a target="_blank" class="pc-items-item-a" href="product_detail">
+            <img class="pc-items-item-img img-loaded" data-rewrite="{width:'468',height: '468'}" data-lazy-collect="1" src="../../static/img/product_image/0/0.jpg" />
+            <div class="pc-items-item-title pc-items-item-title-row2">
+            <span class="title-text">NUM_ROSES roses in a gift box</span>
+            </div>
+            <div class="price-con">
+                <span class="coupon-price-afterCoupon">$0.0</span>
+                <span class="coupon-price-old" style="font-size: 14px;">$0.0</span>
+            </div>
+            <div class="item-footer">
+             <div class="item-tags"></div>
+             <div class="sell-info">
+                monthly sales MONTHLY_SALES
+             </div>
+            </div>
+
+            <div class="add-container">
+                <div class="add-to-cart">ADD TO CART</div>
+            </div>
+        </a>
+    </li>
+</div>
+
+<script>
+
+var data = { };
+var page = 1;
+var size = 10;
+var total = 0;
+var numPages = 0;
+
+
+$(function () {
+    getProducts();
+
+    $('#keyword').change(function () {
+        var keyword = $(this).val();
+        if (keyword.trim()) {
+            var products = data.products.filter(function (product) {
+                return product.title.indexOf(keyword) >= 0 || product.description.indexOf(keyword) >= 0;
+            });
+            renderProducts(products);
+            $('.collection-list .pagination').css('display', 'none');
+        } else {
+            page = 1;
+            $('.collection-list .pagination').css('display', 'block');
+            renderPageProducts();
+        }
+    });
+
+    $('#filter').change(function () {
+        sortProducts();
+    });
+    $('.filters .asc').click(function () {
+        $('.filters .sort span').removeClass('active');
+        $(this).addClass('active');
+        sortProducts();
+    });
+    $('.filters .desc').click(function () {
+        $('.filters .sort span').removeClass('active');
+        $(this).addClass('active');
+        sortProducts();
+    });
+});
+
+function sortProducts () {
+    var filter = $('#filter').val();
+    var sort = $('.filters .sort .active').text();
+    var id = '';
+    switch (true) {
+        case filter === 'title' && sort === 'asc': id = 1;break;
+        case filter === 'title' && sort === 'desc': id = 2;break;
+        case filter === 'price' && sort === 'asc': id = 4;break;
+        case filter === 'price' && sort === 'desc': id = 3;break;
+        case filter === 'stock' && sort === 'asc': id = 5;break;
+        case filter === 'stock' && sort === 'desc': id = 6;break;
+    }
+    axios.post(window.location.origin + '/sort_all_products', Qs.stringify({
+        id: id
+    }), {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+    }).then(function (res) {
+        console.log('00000000000000')
+        console.log(res);
+        console.log(res.data.products.map(e => e[filter]))
+        data = res.data;
+        total = data.products.length;
+        numPages = Math.ceil(total / size);
+        initPagination();
+        renderPageProducts();
+    });
+    // data.products.sort(function (a, b) {
+    //     if (typeof a[filter] === 'number') {
+    //         if (sort === 'asc') {
+    //             return a[filter] - b[filter];
+    //         }
+    //         return b[filter] - a[filter];
+    //     } else {
+    //         if (sort === 'asc') {
+    //             return a[filter].localeCompare(b[filter]);
+    //         }
+    //         return b[filter].localeCompare(a[filter]);
+    //     }
+    // });
+    // page = 1;
+    renderPageProducts();
+}
+
+function getProducts () {
+    axios.get(window.location.origin + '/all').then(function (res) {
+        data = res.data;
+        total = data.products.length;
+        numPages = Math.ceil(total / size);
+
+        initPagination();
+        renderPageProducts();
+    });
+}
+
+// function searchProducts () {
+//     axios.post(window.location.origin + '/customer_search', Qs.stringify({
+//         keyword: '1'
+//     }), {
+//         headers: {
+//             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+//         }
+//     }).then(function (res) {
+//         console.log(res)
+//     });
+// }
+
+function renderProducts (products) {
+    // clear all
+    var ul = $('.pc-search-items-list');
+    ul.html('');
+    var template = $('.product-template');
+    products.forEach(function (product) {
+        var li = template.clone().css('display', 'inline-block');
+        li.find('img').attr('src', window.location.origin + product.image[0]);
+        li.find('a').attr('href', 'product_detail?productId=' + product.product_ID);
+        li.find('.title-text').text(product.title);
+        li.find('.coupon-price-afterCoupon').text('$' + (product.price - product.discount));
+        li.find('.coupon-price-old').text('$' + product.price);
+        li.find('.sell-info').text(product.usage.join(' | '));
+        ul.append(li);
+    });
+}
+
+function initPagination () {
+    var pagination = $('.collection-list .pagination');
+    pagination.html('');
+    for (var i = 1; i <= numPages; i++) {
+        var span = $('<span data-page="' + i + '" class="page-' + i + '">' + i + '</span>');
+        pagination.append(span);
+
+        span.click(function () {
+            page = $(this)[0].dataset.page * 1;
+            renderPageProducts();
+        });
+    }
+}
+
+function renderPageProducts () {
+    $('.collection-list .pagination span.active').removeClass('active');
+    $('.collection-list .pagination .page-' + page).addClass('active');
+    var products = data.products.slice((page - 1) * size, page * size);
+    renderProducts(products);
+}
+
+</script>
+</body>
+</html>
