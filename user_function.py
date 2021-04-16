@@ -26,7 +26,7 @@ def print_email():
     for u in users:
         print(u.email)
 
-
+userr = -1
 #####################################################################################
 #                                                                                   #
 #                               AUTHENTICATION FUNCTIONS                            #
@@ -35,6 +35,7 @@ def print_email():
 # REGISTRATION FUNCTION
 # @app.route("/auth/register", methods=["POST"])
 def register(nickname, email, password, repeat_password):
+    global userr
     '''user = User.query.filter_by(email = "994114654@qq.com").first()
     db.session.delete(user)
     db.session.commit()'''
@@ -66,6 +67,7 @@ def register(nickname, email, password, repeat_password):
     Hi dear """ + nickname + """.\nThanks for registering in fivebluepetals.com\n
     It's a confirmation that you registered successfully\n"""
     #send_email(message, email)
+    userr = u_id
     return dumps({"customer": {'nickname': nickname, 'email': email, 'token': token}})
 
 
@@ -87,45 +89,46 @@ def auth_login(em, input_password):
 
     user.is_online = True  # Setting state to logged in
     db.session.commit()
-
+    print("#########", userr)
     return dumps({"token": user.token, "userInfo": {"name": user.nickname, "id": user.U_id}})
 
 
 def auth_logout(token, user):
     user = user = User.query.filter_by(token=token)  # Finding user for given token
     if user is None:  # If there is no user corresponding to token
-        return dumps({"is_success": False, "reason": "there is no user corresponding to token"})
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
     if user.state == 2:  # If user is already logged out
-        return dumps({"is_success": False, "reason": "user is already logged out"})
+        return dumps({"result": "ERROR", "reason": "user is already logged out"})
     user.state = 2  # Changing the user's state to logged out
-    return dumps({"is_success": True})
+    return dumps({"result": "success"})
 
 
 def find_pic_by_category(category):
     list_of_pro = []
     prods = Product.query.all()
     for p in prods:
-        if category in p.tags:
+        if p.if_shown == True and category in p.tags:
             list_of_pro.append(p)
     products = []
 
     for p in list_of_pro:
         products.append(product_to_dict(p))
-
+    
     return dumps({"products": products})
 
 
-def find_pic_by_keywork(keyword):
+def find_pic_by_keywork(keyword, token):
+    user = User.query.filter_by(token = token).first()
+    create_Search_history(user.U_id, keyword)
     list_of_id = []
     prods = Product.query.all()
     for p in prods:
-        if keyword in p.name:
+        if p.if_shown == True and keyword in p.name:
             list_of_id.append(p)
     product_dicts = []
     for p in list_of_id:
         product_dicts.append(product_to_dict(p))
     return dumps({"products": product_dicts})
-
 
 # @app.route('/', methods=["GET"])  # this actually cannot work now
 def auth_passwordreset_request(em):
@@ -144,30 +147,7 @@ def auth_passwordreset_request(em):
     # N: If this errors, this will be picked up by the error handler and an error will be shown
     msg = "Five Pedals RESET PASSWORD\n\n\nYou've requested to reset your password. Your reset code is : " + reset_code + "."
     send_email(em, msg)
-    return {}
-
-
-def auth_passwordreset_reset(reset_code, new_password):
-    if reset_code is None:
-        raise ValueError(f"Invalid reset code.")
-    user = get_user_for_reset_code(reset_code)
-    if user is None:
-        raise ValueError(f"Invalid reset code.")
-    # Check whether the password given is valid
-    if len(new_password) > 5:
-        user.password = hashpass(new_password)
-    else:
-        raise ValueError(f"Invalid password.")
-    user.reset_code = None  # Resetting reset code to None
-    return {"is_success": True}
-
-
-# register and login helper function
-def get_user_for_reset_code(reset_code):
-    for user in users:
-        if user.reset_code == reset_code:
-            return user
-    return None
+    return dumps({"resetcode": reset_code})
 
 
 def valid_email(em):
@@ -208,37 +188,45 @@ def send_email(receiver_email, message):
 def update_nickname(check_token, new_nickname):
     user = User.query.filter(User.token == check_token).first()  # Finding user for given token
     if user is None:  # If there is no user corresponding to token
-        return dumps({"is_success": False, "reason": "there is no user corresponding to token"})
-    """""
-    if user.is_online == 2:  # If user is already logged out
-        return dumps({"is_success": False, "reason": "user is already logged out"})
-    """""
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+    if len(new_nickname) < 1 or len(new_nickname) > 50:
+        return dumps({"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."})
     user.nickname = new_nickname
     db.session.commit()
-
+    dumps({"result": "success"})
 
 def update_address(check_token, new_address):
     user = User.query.filter(User.token == check_token).first()  # Finding user for given token
     if user is None:  # If there is no user corresponding to token
-        return dumps({"is_success": False, "reason": "there is no user corresponding to token"})
-    """""
-    if user.is_online == 2:  # If user is already logged out
-        return dumps({"is_success": False, "reason": "user is already logged out"})
-    """""
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
     user.address = new_address
     db.session.commit()
+    dumps({"result": "success"})
+
+
+def update_mobile(check_token, new_mobile):
+    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
+    if user is None:  # If there is no user corresponding to token
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+    if new_mobile.isdecimal() == False:  # If there is no user corresponding to token
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+    user.mobile = new_mobile
+    db.session.commit()
+    dumps({"result": "success"})
 
 
 def update_email(check_token, new_email):
     user = User.query.filter(User.token == check_token).first()  # Finding user for given token
     if user is None:  # If there is no user corresponding to token
-        return dumps({"is_success": False, "reason": "there is no user corresponding to token"})
-    """""
-    if user.is_online == 2:  # If user is already logged out
-        return dumps({"is_success": False, "reason": "user is already logged out"})
-    """""
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+    result = valid_email(new_email)
+    if result == -1:
+        return dumps({"result": "ERROR", "reason": "email already registered"})
+    elif result == 0:
+        return dumps({"result": "ERROR", "reason": "Invalid email"})
     user.email = new_email
     db.session.commit()
+    dumps({"result": "success"})
 
 
 def update_mobile(check_token, new_mobile):
@@ -274,10 +262,14 @@ def get_product_information_by_category(categories):
 5 : stock low to high
 6 : stock high to low
 '''
-def sort_by_case(case):
+def sort_by_case(case, low, high):
     case = int(case)
+    low = int(low)
+    high = int(high)
     products = []
     prods = []
+    if high < low:
+        return dumps({"result": "ERROR", "reason": "the upper bond should be lower than lower bound."})
     if case == 1:
         products = Product.query.order_by(Product.name, Product.stock).all()
     if case == 2:  
@@ -293,7 +285,8 @@ def sort_by_case(case):
     if case > 6 or case < 0:
         return dumps({"result": "ERROR", "reason": "Number is not valid."})
     for i in products:
-        prods.append(product_to_dict(i))
+        if i.if_shown == True and high >= i.price and low <= i.price:
+            prods.append(product_to_dict(i))
     return dumps({"products": prods})
 
 def get_all():
@@ -305,8 +298,10 @@ def get_all():
     return dumps({"products":product_dicts}) 
 
 
-def get_prod_by_id(ID):
+def get_prod_by_id(ID, token):
     id = int(ID)
+    user = User.query.filter_by(token = token).first()
+    create_Click_history(user.U_id, id)
     return dumps({"products": [product_to_dict(Product.query.filter_by(pro_id = id).all()[0])]})
 
 def format_addr(s):
@@ -327,3 +322,20 @@ def send_email(content, reciever_email):
     server.login(from_email, from_email_pwd)
     server.sendmail(from_email, [reciever_email], msg.as_string())
     server.quit()
+
+def first_four_recommend():
+    products = get_product_information_by_category("recommend")
+    first_four = products[0:4]
+    return_list = []
+    for p in first_four:
+        return_list.append(product_to_dict(p))
+    return dumps(return_list)
+
+def add_to_cart(productINFO):
+    id_quant = productINFO.split('?')
+    id = int(id_quant[0])
+    quant = int(id_quant[1])
+    product = Product.query.filter_by(pro_id = id).first()
+    if product.stock < quant:
+        return dumps({"result": "ERROR", "reason": "not enough stock"})
+    return dumps({"result": "success"})
