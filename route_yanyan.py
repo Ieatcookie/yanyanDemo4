@@ -37,3 +37,8 @@ def collection():
 @app.route('/mine',methods=['GET'])
 def mine():
     return render_template("/Yanyan/mine.html")
+
+@app.route('/cart',methods=['GET'])
+def cart():
+    return render_template("/Yanyan/cart.html")
+

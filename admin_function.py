@@ -138,6 +138,7 @@ def save_image_by_id(token, image, Id):
         return dumps({"result": "ERROR", "reason": "user with token is not an admin"})
     prod = Product.query.filter_by(pro_id = int(Id)).first()
     if prod is None:
+        #prod = Product.query.filter_by(pro_id = "0000000").first())
         return dumps({"result": "ERROR", "reason": "id " + Id + " doesn't exist"})
     if(path.exists("static/image/product_image") == False):
         return dumps({"result": "ERROR", "reason": "folder : static/image/product_image" " doesn't exist"})

@@ -18,9 +18,9 @@
             <a onclick="updateSection('manageProduct')">Add New</a>
             <a onclick="updateSection('productList')">Manage Products</a>
             <h2>Orders</h2>
-            <a onclick="updateSection('orderList')">Manage Orders</a>
+            <a href="">Manage Orders</a>
             <h2>Customers</h2>
-            <a onclick="updateSection('customerList')">Manage Customers</a>
+            <a href="">Manage Customers</a>
         </div>
         <div class="section">
             
@@ -30,30 +30,17 @@
 </html>
 <script>
     var section = document.getElementsByClassName("section")[0];
-    updateSection("manageOrder?id=0");
+    updateSection("manageProduct");
     function updateSection(type) {
         var token = getCookies("token");
         var url = "";
         if(type=="productList") {
-            url = "/productList?";
+            url = "/productList";
         } else if(type=="manageProduct") {
-            url = "/manageProduct?";
-        } else if(type.startsWith("manageProduct?id=")) {
-            var id = type.substring("manageProduct?id=".length,type.length);
-            url = "/manageProduct?id="+id+"&";
-        } else if(type=="orderList"){
-            url = "/orderList?";
-        } else if(type.startsWith("manageOrder?id=")){
-            var id = type.substring("manageOrder?id=".length,type.length);
-            url = "/manageOrder?id="+id+"&";
-        } else if(type=="customerList"){
-            url = "/customerList?";
-        } else if(type.startsWith("manageCustomer?id=")){
-            var id = type.substring("manageCustomer?id=".length,type.length);
-            url = "/manageCustomer?id="+id+"&";
+            url = "/manageProduct";
         }
         var request = new XMLHttpRequest();
-        request.open("GET",url+"token="+token,false);
+        request.open("GET",url+"?token="+token,false);
         request.send();
         section.innerHTML = request.response;
         if(type=="productList"){
@@ -63,172 +50,11 @@
     function getProducts() {
         var token = getCookies("token");
         var request = new XMLHttpRequest();
+        alert(1);
         request.open("GET","/admin_products?token="+token,false);
-        //request.send();
+        request.send();
+        alert(request.response);
     }
-
-    function priceAfterDiscount() {
-        var original_price = parseFloat(document.getElementById("price").value);
-        var disccount = parseFloat(document.getElementById("discount").value);
-        if(isNaN(disccount)){
-            disccount = 0;
-        }
-        if(disccount>original_price){
-            disccount=original_price;
-        }
-        var new_amount = original_price - disccount;
-        //console.log(new_amount,original_price,disccount);
-        var display_area = document.getElementById("discountted_price");
-        if(new_amount != original_price){
-            display_area.innerHTML= "$ <s style='color:grey'>"+parseFloat(original_price).toFixed(2)+"</s> $" + parseFloat(new_amount).toFixed(2);
-        } else {
-            display_area.innerHTML= "$ " + parseFloat(new_amount).toFixed(2);
-        }
-    }
-
-    function removeImage(id) {
-        var imageWrapper = document.getElementById(id);
-        console.log(id,imageWrapper);
-        imageWrapper.remove();
-    }
-
-    function getAllImagesUrl() {
-        var images = document.getElementsByClassName("single_wrapper");
-        var out = "";
-        for (let index = 0; index < images.length-1; index++) {
-            out += images[index].id;
-            if(index < images.length-2) {
-                out += ",";
-            }
-        }
-        return out;
-    }
-    
-    function sendOrder() {
-        var id = document.getElementById('id').innerHTML;
-        var tracking = document.getElementById("tracking").value;
-        var token = getCookies("token");
-        var formData = new FormData();
-        formData.append("token",token);
-        formData.append("tracknumber",tracking);
-        formData.append("id",id);
-        formData.append("status","ship");
-        var request = new XMLHttpRequest();
-        request.open("POST","/manage_order",false);
-        request.send(formData);
-        var response = JSON.parse(request.response);
-        if(response['result']=="SUCCESS"){
-            updateSection("manageOrder?id="+id);
-        }
-    }
-
-    function cancelOrder(id) {
-        var del = confirm("You sure you want cancel this order?");
-        if(del == false){
-            return;
-        }
-        var token = getCookies("token");
-        var formData = new FormData();
-        formData.append("token",token);
-        formData.append("tracknumber","null");
-        formData.append("id",id);
-        formData.append("status","canceled");
-        var request = new XMLHttpRequest();
-        request.open("POST","/manage_order",false);
-        request.send(formData);
-        var response = JSON.parse(request.response);
-        if(response['result']=="SUCCESS"){
-            updateSection("manageOrder?id="+id);
-        }
-    }
-    function uploadProduct(element) {
-        var files = element.files;
-        var file = files[0];
-        var formData = new FormData();
-        var token = getCookies("token");
-        var id = element.getAttribute("productId");
-        formData.append("token",token);
-        formData.append("image",file);
-        formData.append("id",id);
-        var request = new XMLHttpRequest();
-        request.open("POST","/upload_image",false);
-        request.send(formData);
-        var response = JSON.parse(request.response);
-        console.log(request.response);
-        if(response['result']=="SUCCESS"){
-            updateSection("manageProduct?id="+id);
-        }
-    }
-
-    function updateProduct() {
-        var token = getCookies("token");
-        var product_id = document.getElementById("id").innerHTML;
-        if(product_id=="" || product_id==undefined || product_id==null){
-            product_id = "-1";
-        }
-        var title = document.getElementById("name").value;
-        var price = document.getElementById("price").value;
-        var description = document.getElementById("description").value;
-        var quantity = document.getElementById("stock").value;
-        var disccount = document.getElementById("discount").value;
-        var data = new FormData();
-        data.append("token",token);
-        data.append("productId",product_id);
-        data.append("newTitle",title);
-        data.append("newDescription",description);
-        data.append("newPrice",price);
-        data.append("newQuantity",quantity);
-        data.append("newDiscount",disccount);
-        var category = document.getElementsByClassName("collection");
-        var collections = "";
-        for (let index = 0; index < category.length; index++) {
-            collections += category[index].id;
-            if(index != category.length -1 ){
-                collections+=",";
-            }
-        }
-        data.append("newcategory",collections);
-        data.append("images",getAllImagesUrl());
-        var query = new URLSearchParams(data).toString();
-        var request = new XMLHttpRequest();
-        request.open("POST","/manage_product",false);
-        request.send(data);
-        console.log(request.response);        
-    }
-
-    function randomColor() {
-        var colors = ["#f94144","#f3722c","#f8961e","#f9844a","#f9c74f","#90be6d","#43aa8b","#4d908e","#577590","#277da1"];
-        var num = Math.floor(Math.random()*10);
-        //console.log(num);
-        return colors[num];
-    }
-
-    function addCollection() {
-        var input = document.getElementById("newCollection").value;
-        if(input == "" || input == undefined || input == "null"){
-            return;
-        }
-        var add_area = document.getElementsByClassName("collections")[0];
-        add_area.innerHTML += '<div class="collection" onmouseover="changeColor(\''+input+'\')" onmouseout="backNoraml(\''+input+'\')" id="'+input+'"><span>'+input+'</span><span><a onclick="removeCollection(\''+input+'\')"><img src="/static/icon/delete.png" alt=""></a></span></div>'
-    }
-
-    function changeColor(collection) {
-        var background_changer = document.getElementById(collection);
-        background_changer.style.backgroundColor = randomColor();
-        background_changer.style.boxShadow = "10px 10px 30px black";
-    }
-    
-    function backNoraml(collection) {
-        var background_changer = document.getElementById(collection);
-        background_changer.style.backgroundColor = "white";
-        background_changer.style.boxShadow = "none";
-    }
-
-    function removeCollection(collection) {
-        var collection =  document.getElementById(collection);
-        collection.remove();   
-    }
-
 </script>
 <style>
     body{

@@ -13,11 +13,14 @@
                 <div class="mask"></div>
                 <ul></ul>
             </a>
-            <a href="/cart">Cart</a>
             <a href="">Get Help</a>
         </span>
     </menu>
     <div class="user-info">
+        <a href="/cart" class="cart">
+            <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1618548595485" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2824" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><defs><style type="text/css"></style></defs><path d="M940.592152 882.152887l-69.969829-555.697878a62.629244 62.629244 0 0 0-62.145077-54.788875h-107.95345v-64.034887C700.523796 99.865216 613.514441 12.215512 506.56056 12.215512c-106.969499 0-193.978855 87.649705-193.978855 195.415735v64.034887H204.612638a62.629244 62.629244 0 0 0-62.145078 54.788875L72.528968 882.152887a59.474354 59.474354 0 0 0-0.484166 7.824751v59.177607A62.629244 62.629244 0 0 0 134.658428 1011.784488h743.788646a62.629244 62.629244 0 0 0 62.629244-62.629243v-59.177607c0-2.623869-0.156183-5.232119-0.484166-7.824751z m-565.381203-674.52164c0-73.234046 58.912097-132.80211 131.349611-132.80211 72.421896 0 131.333993 59.568064 131.333993 132.80211v64.034887H375.210949v-64.034887zM134.658428 949.155245v-42.4973h534.535128a20.881621 20.881621 0 1 0 0-41.732005H137.813317l66.799321-530.64618h107.969067v44.090362a105.735656 105.735656 0 0 0-74.264851 100.831521 105.688801 105.688801 0 0 0 141.970031 99.12913 20.850384 20.850384 0 1 0-14.384422-39.186228 63.909941 63.909941 0 0 1-85.837986-59.942902c0-23.802236 13.134961-44.574529 32.517228-55.55417V479.201643a31.314622 31.314622 0 1 0 62.629244 0v-55.55417a63.878705 63.878705 0 0 1 32.532847 55.55417 20.850384 20.850384 0 1 0 41.747623 0c0-47.323344-31.299004-87.462285-74.28047-100.831521v-44.090362h262.683604v44.090362c-42.981466 13.384853-74.28047 53.508177-74.28047 100.831521a105.704419 105.704419 0 0 0 142.001268 99.144748 20.897239 20.897239 0 0 0-14.384423-39.201846 63.909941 63.909941 0 0 1-85.853604-59.942902c0-23.802236 13.134961-44.574529 32.517229-55.55417V479.201643a31.299004 31.299004 0 1 0 62.629243 0v-55.55417a63.847468 63.847468 0 0 1 32.517229 55.55417 20.881621 20.881621 0 1 0 41.763241 0c0-47.323344-31.299004-87.462285-74.28047-100.831521v-44.090362h107.95345l66.830557 530.64618h-95.115236a20.850384 20.850384 0 1 0 0 41.732005h98.254507v42.4973H134.658428z" p-id="2825"></path></svg>
+            <span class="number">0</span>
+        </a>
         <a href="/login" class="login">Login</a>
         <a href="/mine" class="name">用户名</a>
         <span class="logout">Logout</span>
@@ -43,6 +46,40 @@
         display: inline-block;
         text-align: center;
         vertical-align: top;
+    }
+
+    header .cart {
+        display: none;
+        position: relative;
+        top: 6px;
+        margin-right: 20px;
+    }
+
+    header .cart svg {
+        width: 25px;
+        height: 25px;
+        fill: #606666;
+        cursor: pointer;
+    }
+
+    header .cart .number {
+        position: absolute;
+        right: -10px;
+        bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: pink;
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 50%;
+        color: white;
+    }
+
+    header .cart:hover svg {
+        fill: pink;
     }
 
     header > div.header_logo > a > img{
@@ -156,7 +193,7 @@ function init () {
         { name: 'Visiting and condolences', href: 'Visiting and condolences' },
         { name: 'Apology flowers', href: 'Apology flowers' },
         { name: 'Wedding flowers', href: 'Wedding flowers' },
-        { name: 'recommend', href: 'recommend' }
+        { name: 'Congratulations flowers', href: 'Congratulations flowers' }
     ];
     var ul = $('.collection ul');
     for (var i = 0, len = lis.length; i < len; i++) {
@@ -167,6 +204,11 @@ function init () {
             window.location.href = window.location.origin + '/category?name=' + href;
         });
         ul.append(li);
+    }
+
+    var token = window.sessionStorage.getItem('token');
+    if (token) {
+        $('.cart').css('display', 'inline-block');
     }
 
     var user = JSON.parse(window.sessionStorage.getItem('userInfo') || 'null');

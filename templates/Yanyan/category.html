@@ -18,76 +18,26 @@
         margin: 10% auto;
     }
 
-    .collection-list .filters {
-        width: 100%;
-        margin-bottom: 20px;
-    }
-
-    .filters select {
-        outline: none;
-        width: 120px;
-        height: 30px;
-        border-radius: 4px;
-        padding: 0 5px;
-        border: 1px solid #409EFF;
-        color: #303333;
-        font-synthesis: 16px;
-    }
-
-    .filters select:hover {
-        background-color: #409EFF;
-        opacity: 0.6;
-        color: white;
-    }
-
-    .filters .sort {
-        width: 120px;
-        height: 30px;
-        box-sizing: border-box;
-        border-radius: 4px;
+    .product-template {
         position: relative;
-        top: 1px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        margin: 0 10px;
-        border: 1px solid #409EFF;
-        cursor: pointer;
     }
 
-    .filters .sort span {
-        flex: 1;
-        height: 30px;
-        line-height: 28px;
-    }
-
-    .filters .sort span.active {
-        background-color: #409EFF;
-        color: white;
-    }
-
-    .collection-list .pagination {
+    .sold-out {
+        position: absolute;
+        left: 0;
+        top: 100px;
+        display: none;
         width: 100%;
-        margin: 20px 0;
-        font-size: 16px;
-    }
-
-    .collection-list .pagination span {
-        display: inline-block;
-        margin: 0 5px;
-        cursor: pointer;
-        border: 1px solid #409EFF;
-        width: 30px;
-        height: 30px;
-        line-height: 30px;
-        text-align: center;
-        border-radius: 4px;
-    }
-
-    .collection-list .pagination span.active, .collection-list .pagination span:hover {
-        background-color: #409EFF;
         color: white;
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .no-stock {
+        opacity: 0.5;
+    }
+    .no-stock .sold-out {
+        display: block;
     }
 
     .collection-li{
@@ -98,39 +48,6 @@
         border-color: #64dcdc #64dcdc #64dcdc #64dcdc;
         float: left;
         margin-top: 5%
-    }
-    collection-line {
-        width: 20%;
-    }
-    .search-input {
-        width: 30%;
-        height: 50px;
-        padding-left: 35%;
-        position: relative;
-    }
-
-    .input {
-            outline: none;
-            box-sizing: border-box;
-            width: 300px;
-            vertical-align: middle;
-            font-size: 100%;
-            height: 100%;
-            border: 1px solid #f2f2f2;
-            border-radius: 10px;
-            background-color: #fff;
-            position: absolute;
-            left: 65%;
-            padding-left: 20px;
-            z-index: 10;
-    }
-
-    .mobileIcon {
-            height: 100%;
-            width: 100%;
-            z-index: 1;
-            position: relative;
-            top: 100%;
     }
 
     .pc-search-items-list {
@@ -357,7 +274,10 @@ li:hover .add-container {
             </div>
         </a>
     </li>
+    <div class="sold-out">SOLD OUT</div>
 </div>
+
+{% include "Common/footer.html" %}
 
 <script>
 
@@ -367,13 +287,15 @@ $(function () {
 
 function getProducts () {
     var category = getQuery('name');
+    // 这个是要写的接口，返回的是商品列表
     axios.post(window.location.origin + '/collections', Qs.stringify({
         category: category
     }), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
-    }).then(function (res) { 
+    }).then(function (res) {
+        // 获取接口返回的 products，如果接口返回的有错误，就默认没有 products 
         var products = res.data.products;
         if (res.data.reason) {
             products = [];
@@ -395,6 +317,10 @@ function renderProducts (products) {
         li.find('.coupon-price-afterCoupon').text('$' + (product.price - product.discount));
         li.find('.coupon-price-old').text('$' + product.price);
         li.find('.sell-info').text(product.usage.join(' | '));
+        if (product.stock <= 500) {
+            li.addClass('no-stock');
+            li.find('.add-container').remove();
+        }
         ul.append(li);
     });
 }

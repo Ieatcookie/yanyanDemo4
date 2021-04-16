@@ -18,6 +18,28 @@
         margin: 10% auto;
     }
 
+    .product-template {
+        position: relative;
+    }
+
+    .sold-out {
+        position: absolute;
+        left: 0;
+        top: 100px;
+        display: none;
+        width: 100%;
+        color: white;
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .no-stock {
+        opacity: 0.5;
+    }
+    .no-stock .sold-out {
+        display: block;
+    }
+
     .collection-list .filters {
         width: 100%;
         margin-bottom: 20px;
@@ -69,7 +91,7 @@
 
     .collection-list .pagination {
         width: 100%;
-        margin: 20px 0;
+        margin: 40px 0;
         font-size: 16px;
     }
 
@@ -380,7 +402,10 @@ li:hover .add-container {
             </div>
         </a>
     </li>
+    <div class="sold-out">SOLD OUT</div>
 </div>
+
+{% include "Common/footer.html" %}
 
 <script>
 
@@ -395,13 +420,21 @@ $(function () {
     getProducts();
 
     $('#keyword').change(function () {
-        var keyword = $(this).val();
+        var keyword = $(this).val().trim();
+
         if (keyword.trim()) {
-            var products = data.products.filter(function (product) {
-                return product.title.indexOf(keyword) >= 0 || product.description.indexOf(keyword) >= 0;
+            axios.post(window.location.origin + '/customer_search', Qs.stringify({
+                keyword: keyword,
+                token: window.sessionStorage.getItem('token')
+            }), {
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                }
+            }).then(function (res) {
+                var products = res.data.products;
+                renderProducts(products);
+                $('.collection-list .pagination').css('display', 'none');
             });
-            renderProducts(products);
-            $('.collection-list .pagination').css('display', 'none');
         } else {
             page = 1;
             $('.collection-list .pagination').css('display', 'block');
@@ -436,7 +469,7 @@ function sortProducts () {
         case filter === 'stock' && sort === 'asc': id = 5;break;
         case filter === 'stock' && sort === 'desc': id = 6;break;
     }
-    axios.post(window.location.origin + '/sort_all_products', Qs.stringify({
+    axios.post(window.location.origin + '/sort_all_product', Qs.stringify({
         id: id
     }), {
         headers: {
@@ -493,7 +526,6 @@ function getProducts () {
 // }
 
 function renderProducts (products) {
-    // clear all
     var ul = $('.pc-search-items-list');
     ul.html('');
     var template = $('.product-template');
@@ -505,6 +537,10 @@ function renderProducts (products) {
         li.find('.coupon-price-afterCoupon').text('$' + (product.price - product.discount));
         li.find('.coupon-price-old').text('$' + product.price);
         li.find('.sell-info').text(product.usage.join(' | '));
+        if (product.stock <= 0) {
+            li.addClass('no-stock');
+            li.find('.add-container').remove();
+        }
         ul.append(li);
     });
 }

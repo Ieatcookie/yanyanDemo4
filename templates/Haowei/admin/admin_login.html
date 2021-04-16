@@ -15,34 +15,13 @@
         <label for="admin">Admin Account</label>
         <input type="text" name="admin_username" id="admin_username" placeholder="Enter your email">
         <label for="admin">Password</label>
-        <input type="password" name="password" id="password" placeholder="Enter your password">
+        <input type="text" name="password" id="password" placeholder="Enter your password">
         <button type="button" onclick="admin_login()">Login</button>
     </form>
 </body>
 </html>
 
 <script>
-    function addCookies(key,value){
-        document.cookie = key+"="+value+";"
-        console.log(document.cookie);
-    }
-
-
-    function getCookies(key){
-        var name = key+"=";
-        var decodedCookie = decodeURIComponent(document.cookie);
-        var value = decodedCookie.split(';');
-        for(var i = 0; i <value.length; i++) {
-            var c = value[i];
-            while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-            }
-        }
-        return "";        
-    }
     function admin_login() {
         var username = document.getElementById("admin_username").value;
         var password = document.getElementById("password").value;

@@ -73,11 +73,13 @@ class Click_history(db.Model):
 class Purchase_history(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     U_id = db.Column(db.Integer, nullable=False)
-    O_id = db.Column(db.Integer, nullable=False)
+    p_id = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, pic_link, pro_id):
+    def __init__(self, U_id, p_id, quant):
         self.U_id = U_id
-        self.O_id = O_id
+        self.p_id = p_id
+        self.quantity = quant
 
 
 class Product(db.Model):
@@ -116,15 +118,21 @@ class Product_picture(db.Model):
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    reciever = db.Column(db.String(100))
+    mobile = db.Column(db.String(20))
+    email = db.Column(db.String(100))
     U_id = db.Column(db.Integer)
     status = db.Column(db.Integer)
-    time = db.Column(db.String(10))
+    time = db.Column(db.String(20))
     address = db.Column(db.String(100))
     comment = db.Column(db.String(200))
     track_number = db.Column(db.String(100))
 
-    def __init__(self, U_id, status, time, address, comment, track_number):
+    def __init__(self, U_id, reciever, mobile, email , status, time, address, comment, track_number):
         self.U_id = U_id
+        self.reciever = reciever
+        self.mobile = mobile
+        self.email = email
         self.status = status
         self.time = time
         self.address = address
@@ -136,12 +144,12 @@ class Order_products(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     o_id = db.Column(db.Integer)
     p_id = db.Column(db.Integer)
+    quantity = db.Column(db.Integer)
 
-    def __init__(self, o_id, p_id):
+    def __init__(self, o_id, p_id, quant):
         self.o_id = o_id
         self.p_id = p_id
-        print(o_id, p_id)
-
+        self.quantity = quant
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -165,9 +173,6 @@ def load_data():
             create_product(pro["id"], pro["title"], True, pro["price"], round(random.uniform(2, 4) * random.uniform(1, 2) * 100), round(random.uniform(2, 4) * random.uniform(1, 2) * 100), 0, tags, pro["description"])
             for image in pro["image"]:
                 create_product_picture(image, int(pro["id"]))
-    create_user(0, "13421234123412341234", "frank", False, "Phranqueli@gmail.com", hashlib.sha256("123456".encode()).hexdigest(), "Street Address111%%%Suburb111%%%Zip111%%%State111", "1339121234")
-    create_user(1, "1342123412341234123412341234", "david", False, "Phranqueli123@gmail.com", hashlib.sha256("123456".encode()).hexdigest(), "Street Address222%%%Suburb222%%%Zip222%%%State222", "0455555666")
-    create_user(2, "13421234123412341234123412341234", "tony", False, "Phranqueli14123@gmail.com", hashlib.sha256("123456".encode()).hexdigest(), "Street Address333%%%Suburb333%%%Zip333%%%State333", "0468987654")
 
 
 def add_item(item):
@@ -180,10 +185,17 @@ def create_user(id_number, token, nickname, online, em, passw, addre, mobile):
     new_user = User(id_number, token, nickname, online, em, passw, addre, mobile)
     add_item(new_user)
 
+def create_Click_history(U_id, p_id):
+    new_ch = Click_history(U_id, p_id)
+    add_item(new_ch)
+
+def create_Search_history(U_id, history):
+    new_sh = Click_history(U_id, history)
+    add_item(new_sh)
 
 # can be NULL at the beginning
-def create_order(id_number, status, time, address, comment, track_number):
-    new_order = Order(id_number, status, time, address, comment, track_number)
+def create_order(id_number, recieve_name, mobile, email, status, time, address, comment, track_number):
+    new_order = Order(id_number, recieve_name, mobile, email, status, time, address, comment, track_number)
     add_item(new_order)
 
 
@@ -197,11 +209,19 @@ def create_product_picture(pic_link, pro_id):
     add_item(new_pic_pro)
 
 
-def create_op(o_id, p_id):
-    new_op = Order_products(o_id, p_id)
+def create_op(o_id, p_id, quant):
+    new_op = Order_products(o_id, p_id, quant)
     add_item(new_op)
 
-
+def create_Purchase_history(u_id, p_id, quant):
+    ph = Purchase_history.query.filter_by(U_id = u_id, p_id = p_id).first()
+    if ph == None:
+        new_ph = Purchase_history(u_id, p_id, quant)
+        add_item(new_ph)
+    else:
+        ph.quantity = ph.quantity + quant
+        db.session.commit()
+        
 def creatte_admin(em, passs):
     new_adm = Admin(em, passs)
     add_item(new_adm)
@@ -231,24 +251,30 @@ def product_to_dict(product):
         "stock":product.stock,
         "discount":product.discount,
         "usage": usages,
-        "description": product.description
-    }
+        "description": product.description,
+        "is_visible": product.if_shown}
 
 
 def order_to_dict(order):
+    print(order.U_id)
     user = User.query.filter_by(U_id=order.U_id).first()
     ops = Order_products.query.filter_by(o_id=order.id).all()
     products = []
     prods = []
+    quantity = []
     for op in ops:
         pro = Product.query.filter_by(pro_id=op.p_id).first()
         products.append(pro)
+        quantity.append(op.quantity)
     for p in products:
         prods.append(product_to_dict(p))
     return {"order_ID": order.id,
-            "customer": {'nickname': user.nickname, 'address': user.address, 'email': user.email,
-                         'mobile': user.mobile},
+            "customer": user_to_dict(user),
             "product": prods,
+            "quantity" : quantity,
+            "phone" : order.mobile,
+            "email" : order.email,
+            "address" : order.reciever + "\nat\n" + order.address,
             "status": order.status,
             "track_number": order.track_number}
 

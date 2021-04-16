@@ -30,7 +30,7 @@ def customer_logout(token):
 def customer_search():
     keyword = request.form["keyword"]
     token = request.form["token"]
-    return find_pic_by_category(keyword)
+    return find_pic_by_keywork(keyword)
 
 
 @app.route('/cart_products', methods=['GET'])
@@ -159,7 +159,7 @@ def database():
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
-    return first_four_recommend()
+    return admin_recommend()
 
 @app.route('/guess_you_like', methods=['POST'])
 def guess_you_like():

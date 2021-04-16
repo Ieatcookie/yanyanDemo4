@@ -5,6 +5,7 @@ import time
 import uuid
 import re
 import hashlib
+import random
 # from flask_cors import CORS
 from flask import Flask, request, jsonify
 from db import *
@@ -89,7 +90,8 @@ def auth_login(em, input_password):
 
     user.is_online = True  # Setting state to logged in
     db.session.commit()
-    print("#########", userr)
+    print(user.token)
+
     return dumps({"token": user.token, "userInfo": {"name": user.nickname, "id": user.U_id}})
 
 
@@ -244,7 +246,7 @@ def update_mobile(check_token, new_mobile):
 # this method needs to add token in the future
 def get_product_information_by_category(categories):
     products = Product.query.all()
-    print(products)
+    #print(products)
     return_list1 = []
     for pro in products:
         if categories in pro.tags:
@@ -299,8 +301,9 @@ def get_all():
 
 
 def get_prod_by_id(ID, token):
+    print(token)
     id = int(ID)
-    user = User.query.filter_by(token = token).first()
+    user=User.query.filter_by(token = token).first()
     create_Click_history(user.U_id, id)
     return dumps({"products": [product_to_dict(Product.query.filter_by(pro_id = id).all()[0])]})
 
@@ -323,13 +326,8 @@ def send_email(content, reciever_email):
     server.sendmail(from_email, [reciever_email], msg.as_string())
     server.quit()
 
-def first_four_recommend():
-    products = get_product_information_by_category("recommend")
-    first_four = products[0:4]
-    return_list = []
-    for p in first_four:
-        return_list.append(product_to_dict(p))
-    return dumps(return_list)
+def admin_recommend():
+    return get_product_information_by_category("recommend")
 
 def add_to_cart(productINFO):
     id_quant = productINFO.split('?')
@@ -339,3 +337,27 @@ def add_to_cart(productINFO):
     if product.stock < quant:
         return dumps({"result": "ERROR", "reason": "not enough stock"})
     return dumps({"result": "success"})
+
+def guess(token):
+    user = User.query.filter_by(token = token).first()
+    products = Product.query.order_by(Product.stock).all()
+    list_of_id = []
+    if user == None:
+        list_of_id = random_product_id(len(products), 4)
+    else:
+        p_favor = []
+        for p in products:
+            p_favor.append({"product" : p, "favor": 0})
+        
+        
+
+def random_product_id(length, n):
+    i = 0
+    l_of_id = []
+    while i != 4:
+        x = round(random.uniform(1, length) * random.uniform(1, length)) % length + 1
+        if x not in l_of_id:
+            l_of_id.append(x)
+            i = i + 1
+
+    return l_of_id

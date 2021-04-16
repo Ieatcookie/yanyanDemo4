@@ -230,7 +230,8 @@ var product = { };
 
 function getProduct () {
 	axios.post(window.location.origin + '/get_product_by_id', Qs.stringify({
-        id: getQuery('productId')
+        id: getQuery('productId'),
+        token: window.sessionStorage.getItem('token')
     }), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
@@ -312,6 +313,22 @@ function renderProductInfo () {
 	$('.img-container').mouseout(function (e) {
 		$('.spot-container').css('display', 'none');
 		$('.img-container .mask').css('display', 'none');
+	});
+
+	$('.add-to-cart').click(function (e) {
+		// 调用添加到购物车的接口，提供商品 id 参数，添加的数量 count 参数，用户 token 参数
+		axios.post(window.location.origin + '/add_to_cart', Qs.stringify({
+	        id: getQuery('productId'),
+	        count: $('.inputer input').val() * 1,
+	        token: window.sessionStorage.getItem('token')
+	    }), {
+	        headers: {
+	            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+	        }
+	    }).then(function (res) {
+	    	// 添加到购物车后，刷新页面
+	    	window.location.reload();
+	    });
 	});
 }
 

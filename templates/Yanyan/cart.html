@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
+    <link rel="icon" href="../../static/img/favicon.png" />
+</head>
+<style>
+    .laut-main {
+        width: 100%;
+        position: relative;
+    }
+    .title {
+        font-size: 36px;
+        font-family: "Gentium Book Basic", sans-serif;
+        font-weight: 500;
+        text-align: center;
+        color: #606666;
+    }
+    .product-list {
+        width: 80%;
+        margin: auto;
+        border-top: 1px solid #ddd;
+        border-left: 1px solid #ddd;
+        margin-bottom: 60px;
+    }
+    .head, .row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 80px;
+        line-height: 80px;
+    }
+    .head span, .row span {
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        flex: 1;
+    }
+    .row .remove span {
+        cursor: pointer;
+    }
+    .row .remove span:hover {
+        color: orangered;
+    }
+    .row .image {
+        height: 80px;
+    }
+    .row img {
+        height: 70px;
+        margin-top: 5px;
+    }
+    .row .remove {
+        font-size: 26px;
+    }
+</style>
+<body>
+{% include "Common/header.html" %}
+
+<script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../../static/js/axios.min.js"></script>
+<script type="text/javascript" src="../../static/js/qs.min.js"></script>
+
+<div id="nav-bottom"></div>
+<script type="text/javascript">$("#nav-bottom").load("top.html");</script>
+<div class="laut-main">
+    <p class="title">My Shopping Cart</p>
+    <div class="product-list">
+        <div class="head">
+            <span class="image">Product Image</span>
+            <span class="name">Product Name</span>
+            <span class="unit-price">Unit Price</span>
+            <span class="total">Total</span>
+            <span class="remove">
+                <span>Remove</span>
+            </span>
+        </div>
+        <div class="table"></div>
+    </div>
+</div>
+
+{% include "Common/footer.html" %}
+
+<script>
+
+$(function () {
+    getCartProducts();
+});
+
+function getCartProducts () {
+    // 这个是要写的接口，返回的是购物车商品列表
+    axios.post(window.location.origin + '/cart_products', Qs.stringify({
+        token: window.sessionStorage.getItem('token')
+    }), {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+    }).then(function (res) {
+        // 获取接口返回的 products，如果接口返回的有错误，就默认没有 products 
+        var products = res.data.products;
+        if (res.data.reason) {
+            products = [];
+        }
+        renderProducts(products);
+    });
+}
+
+function renderProducts (products) {
+    // 清空现在展示的花的列表
+    var table = $('.table');
+    table.html('');
+    var template = $('.product-list .head');
+    products.forEach(function (product) {
+        var div = template.clone(true).removeClass('head').addClass('row');
+        div.find('.image').html('').append($('<img/>').attr('src', window.location.origin + product.image[0]));
+        div.find('.name').text(product.title);
+        div.find('.unit-price').text('$' + (product.price - product.discount));
+        div.find('.total').text(product.total);
+        div.find('.remove span').text('x');
+        table.append(div);
+        div.find('.remove span').click(function (e) {
+            axios.post(window.location.origin + '/delete_product_from_cart', Qs.stringify({
+                id: product.product_ID,
+                token: window.sessionStorage.getItem('token')
+            }), {
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                }
+            }).then(function (res) {
+                window.location.reload();
+            });
+        });
+    });
+}
+
+</script>
+</body>
+</html>
