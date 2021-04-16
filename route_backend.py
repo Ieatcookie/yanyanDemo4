@@ -29,6 +29,7 @@ def customer_logout(token):
 @app.route('/customer_search', methods=['POST'])
 def customer_search():
     keyword = request.form["keyword"]
+    token = request.form["token"]
     return find_pic_by_category(keyword)
 
 
@@ -141,16 +142,27 @@ def upload_image():
 @app.route('/sort_all_products', methods=['POST'])
 def sort_all_productss():
     id = request.form["id"]
-    products = sort_by_case(id)
-    return sort_by_case(id)
+    lower_bound = request.form["lower_bound"]
+    higher_bound = request.form["higher_bound"]
+    return sort_by_case(id, lower_bound, higher_bound)
 
 @app.route('/get_product_by_id', methods=['POST'])
 def get_product_by_id():
     id = request.form["id"]
-    return get_prod_by_id(id)
+    token = request.form["token"]
+    return get_prod_by_id(id, token)
 
 @app.route('/collections',methods=['POST'])
 def database():
     category = request.form["category"]
     return find_pic_by_category(category)
+
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    return first_four_recommend()
+
+@app.route('/guess_you_like', methods=['POST'])
+def guess_you_like():
+    token = request.form["token"]
+    return guess(token)
 
