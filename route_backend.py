@@ -17,7 +17,8 @@ def auth_register():
     password = request.form['password']
     nickname = request.form['nickname']
     repeat_password = request.form['repeat_password']
-    return register(nickname, email, password, repeat_password)
+    mobile = request.form['mobile']
+    return register(nickname, email, password, repeat_password, mobile)
 
 
 @app.route('/customer_logout', methods=['POST'])
@@ -30,7 +31,7 @@ def customer_logout(token):
 def customer_search():
     keyword = request.form["keyword"]
     token = request.form["token"]
-    return find_pic_by_keywork(keyword)
+    return find_pic_by_keywork(keyword, token)
 
 
 @app.route('/cart_products', methods=['GET'])

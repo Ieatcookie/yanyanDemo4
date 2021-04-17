@@ -33,6 +33,28 @@
             position: relative;
             align-items: center;
         }
+        .captcha, #captcha {
+            display: inline-block;
+            border: 1px solid #409EFF;
+            padding: 3px 10px;
+            font-size: 13px;
+            color: 303333;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            width: 100px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            position: absolute;
+            right: 230px;
+            top: 22px;
+        }
+        #captcha {
+            text-align: left;
+            padding: 4px 10px;
+            disps
+        }
         .field .label {
             flex: 1;
             color: #606666;
@@ -59,6 +81,14 @@
             width: 200px;
             height: 40px;
             display: none;
+        }
+        .captcha input {
+            display: inline-block;
+            border: 1px solid #409EFF;
+            border-radius: 4px;
+            outline: none;
+            width: 120px;
+            height: 28px;
         }
         .operation {
             margin-top: 60px;
@@ -95,24 +125,26 @@
 
 <div class="mine">
     <div class="field">
-        <span class="label">Nickname: </span>
-        <span class="value">Michael</span>
-        <input type="text" class="inputer" id="nick_name">
+        <span class="label">Name: </span>
+        <span class="value"></span>
+        <input type="text" class="inputer" id="name">
     </div>
     <div class="field">
-        <span class="label">First name: </span>
-        <span class="value">Michael</span>
-        <input type="text" class="inputer" id="first_name">
-    </div>
-    <div class="field">
-        <span class="label">Last name: </span>
-        <span class="value">Michael</span>
-        <input type="text" class="inputer" id="last_name">
+        <span class="label">Mobile: </span>
+        <span class="value"></span>
+        <input type="text" class="inputer" id="mobile">
     </div>
     <div class="field">
         <span class="label">Email: </span>
-        <span class="value">123@qq.com</span>
+        <span class="value"></span>
         <input type="text" class="inputer" id="email">
+    </div>
+    <div class="field">
+        <span class="label">Password: </span>
+        <span class="captcha">get captcha</span>
+        <input type="text" id="captcha">
+        <span class="value"></span>
+        <input type="text" class="inputer" id="password">
     </div>
     <div class="operation">
         <div class="edit">Edit profile</div>        
@@ -122,13 +154,22 @@
 
 <script>
 $(function () {
+    var userInfo = JSON.parse(window.sessionStorage.getItem('userInfo') || '{}');
+    $('#name').prev().text(userInfo.name);
+    $('#mobile').prev().text(userInfo.mobile);
+    $('#email').prev().text(userInfo.email);
+    $('#password').prev().text('***');
+    $('#name').val(userInfo.name);
+    $('#mobile').val(userInfo.mobile);
+    $('#email').val(userInfo.email);
+    $('#password').val('');
     $('.mine .edit').click(function () {
         if ($(this).text() == 'Edit profile') {
             $('.mine .field .inputer').css('display', 'inline-block');
             $('.mine .field .value').css('display', 'none');
             $(this).text('Submit');
         } else {
-            var fields = ['nick_name', 'first_name', 'last_name', 'email'];
+            var fields = ['name', 'mobile', 'email', 'password'];
             var params = { };
             for (var key of fields) {
                 console.log(key)

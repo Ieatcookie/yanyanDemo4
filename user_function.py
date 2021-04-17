@@ -27,7 +27,6 @@ def print_email():
     for u in users:
         print(u.email)
 
-userr = -1
 #####################################################################################
 #                                                                                   #
 #                               AUTHENTICATION FUNCTIONS                            #
@@ -35,8 +34,7 @@ userr = -1
 #####################################################################################
 # REGISTRATION FUNCTION
 # @app.route("/auth/register", methods=["POST"])
-def register(nickname, email, password, repeat_password):
-    global userr
+def register(nickname, email, password, repeat_password, mobile):
     '''user = User.query.filter_by(email = "994114654@qq.com").first()
     db.session.delete(user)
     db.session.commit()'''
@@ -62,12 +60,12 @@ def register(nickname, email, password, repeat_password):
     u_id = 10000 + len(users)
     token = get_token(int(u_id))  # Getting token
     # Creating a user and setting variables of the user
-    create_user(u_id, token, nickname, False, email, password, None, None)
+    create_user(u_id, token, nickname, False, email, password, None, mobile)
     message = """\
     fivebluepetals\n\n\n 
     Hi dear """ + nickname + """.\nThanks for registering in fivebluepetals.com\n
     It's a confirmation that you registered successfully\n"""
-    #send_email(message, email)
+    send_email(message, email)
     userr = u_id
     return dumps({"customer": {'nickname': nickname, 'email': email, 'token': token}})
 
@@ -90,9 +88,13 @@ def auth_login(em, input_password):
 
     user.is_online = True  # Setting state to logged in
     db.session.commit()
-    print(user.token)
-
-    return dumps({"token": user.token, "userInfo": {"name": user.nickname, "id": user.U_id}})
+    return dumps({"token": user.token, "userInfo": {
+        "name": user.nickname,
+        "id": user.U_id,
+        "mobile":user.mobile,
+        "password":user.password,
+        "email":user.email
+    }})
 
 
 def auth_logout(token, user):
@@ -121,7 +123,8 @@ def find_pic_by_category(category):
 
 def find_pic_by_keywork(keyword, token):
     user = User.query.filter_by(token = token).first()
-    create_Search_history(user.U_id, keyword)
+    if user != None:
+        create_Search_history(user.U_id, keyword)
     list_of_id = []
     prods = Product.query.all()
     for p in prods:
@@ -143,7 +146,7 @@ def auth_passwordreset_request(em):
         return dumps({"result": "ERROR", "reason": "Invalid Email."})
     # Finding u_id associated with token
     user = User.query.filter_by(email=em).first()
-    reset_code = gen_reset_code()  # Generating reset code
+    reset_code = gen_reset_code()
 
     # Sending reset code to user by email
     # N: If this errors, this will be picked up by the error handler and an error will be shown
@@ -246,7 +249,6 @@ def update_mobile(check_token, new_mobile):
 # this method needs to add token in the future
 def get_product_information_by_category(categories):
     products = Product.query.all()
-    #print(products)
     return_list1 = []
     for pro in products:
         if categories in pro.tags:
@@ -256,6 +258,26 @@ def get_product_information_by_category(categories):
         product_dicts.append(product_to_dict(i))
     return dumps({"products": product_dicts})
 
+
+def include_category(product, categories):
+    int_to_cate = {
+        '1': "Love flowers",
+        '2': "Friendship flowers",
+        '3': "Birthday flowers",
+        '4': "Greeting flowers",
+        '5': "Repay the teacher",
+        '6': "Visiting and condolences",
+        '7': "Apology flowers",
+        '8': "Wedding flowers"
+    }
+    cs = categories.split(",")
+    pcs = product.tags.split(",")
+    for pc in pcs:
+        for c in cs:
+            if int_to_cate[c] == pc:
+                return True
+    return False
+
 '''
 1 : A-Z
 2 : Z-A
@@ -264,7 +286,7 @@ def get_product_information_by_category(categories):
 5 : stock low to high
 6 : stock high to low
 '''
-def sort_by_case(case, low, high):
+def sort_by_case(case, low, high, categories):
     case = int(case)
     low = int(low)
     high = int(high)
@@ -287,7 +309,7 @@ def sort_by_case(case, low, high):
     if case > 6 or case < 0:
         return dumps({"result": "ERROR", "reason": "Number is not valid."})
     for i in products:
-        if i.if_shown == True and high >= i.price and low <= i.price:
+        if i.if_shown == True and high >= i.price and low <= i.price and include_category(i, categories) is True:
             prods.append(product_to_dict(i))
     return dumps({"products": prods})
 
@@ -301,10 +323,13 @@ def get_all():
 
 
 def get_prod_by_id(ID, token):
-    print(token)
     id = int(ID)
-    user=User.query.filter_by(token = token).first()
-    create_Click_history(user.U_id, id)
+    print("#####", token)
+    user = User.query.filter_by(token = token).first()
+    if user != None:
+        c_h = Click_history.query.filter_by(U_id = user.U_id, P_id = id).first()
+        if c_h == None:
+            create_Click_history(user.U_id, id)
     return dumps({"products": [product_to_dict(Product.query.filter_by(pro_id = id).all()[0])]})
 
 def format_addr(s):
@@ -338,18 +363,24 @@ def add_to_cart(productINFO):
         return dumps({"result": "ERROR", "reason": "not enough stock"})
     return dumps({"result": "success"})
 
-def guess(token):
-    user = User.query.filter_by(token = token).first()
-    products = Product.query.order_by(Product.stock).all()
-    list_of_id = []
-    if user == None:
-        list_of_id = random_product_id(len(products), 4)
-    else:
-        p_favor = []
-        for p in products:
-            p_favor.append({"product" : p, "favor": 0})
-        
-        
+
+def if_user_viewed(U_id, P_id):
+    c_h = Click_history.query.filter_by(U_id = U_id, P_id = P_id).first()
+    if c_h == None:
+        return False
+    return True
+
+def num_search_to_favor(U_id, p_name, p_tag):
+    count_keyword = 0
+    count_category = 0
+    historys = Search_history.query.filter_by(U_id = U_id).all()
+    for history in historys:
+        if history.search in p_name:
+            count_keyword = count_keyword + 1
+        if history.search in p_tag:
+            count_category = count_category + 1
+    
+    return count_category * 3 + count_keyword * 6
 
 def random_product_id(length, n):
     i = 0
@@ -361,3 +392,41 @@ def random_product_id(length, n):
             i = i + 1
 
     return l_of_id
+
+#if customer viewed this item before, there is higher possibility that the product get recomm
+#if customer searched related term before, there will also be higher possibility that the product get recomm
+#but not high as click history
+#product with more stock will get recomm with hgiher askdhfkala posibillity
+def guess(token):
+    user = User.query.filter_by(token = token).first()
+    products = Product.query.order_by(Product.stock.desc()).all()
+    length = len(products)
+    product_list = []
+    if user == None:
+        list_of_id = random_product_id(length, 20)
+        while len(list_of_id) > 0:
+            number = list_of_id.pop(0)
+            for p in products: 
+                if  p.pro_id == number:
+                    product_list.append(p)
+    else:
+        p_favor = {}
+        i = length
+        u_id = user.U_id
+        for p in products:
+            fav_num = i * 10 /length
+            if if_user_viewed(u_id, p.pro_id) == True:
+                fav_num = fav_num + 30
+            fav_num = fav_num + num_search_to_favor(user.U_id, p.name, p.tags)
+            p_favor[p] = fav_num
+            i = i - 1
+        product_list = sorted(p_favor, key=p_favor.get, reverse=True)
+    dict_list = []
+    for p in product_list:
+        dict_list.append(product_to_dict(p))
+    return dict_list
+        
+        
+        
+        
+

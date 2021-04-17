@@ -141,7 +141,6 @@
                 }).then(function (res) {
                     if (res.data.token) {
                         window.sessionStorage.setItem('token', res.data.token);
-                        console.log("0000000")
                         window.sessionStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
                         window.location.href = window.location.origin;
                     } else {
