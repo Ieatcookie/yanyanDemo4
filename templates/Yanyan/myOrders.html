@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mine</title>
+    <script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../../static/js/axios.min.js"></script>
+    <script type="text/javascript" src="../../static/js/qs.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+        .orders {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            min-height: 300px;
+            text-align: center;
+        }
+        .orders {
+            border-collapse: collapse;
+        }
+        .orders th {
+            height: 30px;
+        }
+        .orders th, .orders td {
+            padding: 2px 5px;
+        }
+        .orders .products {
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            min-height: 50px;
+        }
+        .orders .product {
+            width: 50%;
+            display: inline-block;
+        }
+        .orders .product img {
+            width: 90%;
+            display: block;
+            margin: 5px auto;
+        }
+        .orders .product span {
+            color: orangered;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="home-body">
+{% include "Common/header.html" %}
+
+<table class="orders" border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>phone</th>
+            <th width="30%">products</th>
+            <th>email</th>
+            <th>address</th>
+            <th>customer</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+$(function () {
+    var userInfo = JSON.parse(window.sessionStorage.getItem('userInfo') || '{}');
+    axios.post(window.location.origin + '/order_history', Qs.stringify({
+        token: window.sessionStorage.getItem('token')
+    }), {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+        }
+    }).then(function (res) {
+        var tbody = $('tbody');
+        var orders = res.data.orders;
+        orders.forEach(function (order) {
+            var tr = $('<tr></tr>');
+            tr.append($('<td></td>').text(order.order_ID));
+            tr.append($('<td></td>').text(order.phone));
+            var td = $('<td class="products"></td>');
+            order.product.forEach(function (p, index) {
+                var node = $('<a class="product"></a>');
+                node.attr('href', window.location.origin + '/product_detail?productId=' + p.product_ID);
+                node.append($('<img/>').attr('src', window.location.origin + p.image[0]));
+                node.append($('<span></span>').text(order.quantity[index] + ' * $' + p.price));
+                td.append(node);
+            });
+            tr.append(td);
+            tr.append($('<td></td>').text(order.email));
+            tr.append($('<td></td>').text(order.address));
+            tr.append($('<td></td>').text(order.customer.name));
+            tbody.append(tr);
+        });
+    });
+});
+</script>
+</body>
+</html>

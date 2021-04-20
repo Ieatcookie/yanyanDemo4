@@ -145,7 +145,8 @@ def sort_all_productss():
     id = request.form["id"]
     lower_bound = request.form["lower_bound"]
     higher_bound = request.form["higher_bound"]
-    return sort_by_case(id, lower_bound, higher_bound)
+    categories = request.form["categories"]
+    return sort_by_case(id, lower_bound, higher_bound, categories)
 
 @app.route('/get_product_by_id', methods=['POST'])
 def get_product_by_id():
@@ -166,4 +167,25 @@ def recommend():
 def guess_you_like():
     token = request.form["token"]
     return guess(token)
+
+@app.route('/send_code', methods=['POST'])
+def reset_password():
+    token = request.form["token"]
+    return auth_passwordreset_request(token)
+
+@app.route('/update_profile', methods = ['POST'])
+def update_profile():
+    email = request.form.get('email', type = str, default = None)
+    password = request.form.get('password', type = str, default = None)
+    nickname = request.form['name']
+    token = request.form['token']
+    mobile = request.form['mobile']
+    reset_code = request.form.get('captcha', type = str, default = None)
+    return edit_profile(email, password, nickname, token, mobile, reset_code)
+
+@app.route('/order_history', methods = ['POST'])
+def order_history():
+    token = request.form['token']
+    return users_orders(token)
+
 

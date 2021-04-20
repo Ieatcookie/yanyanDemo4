@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8" />
+    <script type=text/javascript src="{{url_for('static', filename='js/script.js') }}"></script>
 	<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE">
 	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 	<title>Product Detail</title>
@@ -316,19 +317,28 @@ function renderProductInfo () {
 	});
 
 	$('.add-to-cart').click(function (e) {
-		// 调用添加到购物车的接口，提供商品 id 参数，添加的数量 count 参数，用户 token 参数
-		axios.post(window.location.origin + '/add_to_cart', Qs.stringify({
-	        id: getQuery('productId'),
-	        count: $('.inputer input').val() * 1,
-	        token: window.sessionStorage.getItem('token')
-	    }), {
-	        headers: {
-	            'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-	        }
-	    }).then(function (res) {
-	    	// 添加到购物车后，刷新页面
-	    	window.location.reload();
-	    });
+		var token = window.sessionStorage.getItem('token');
+		if (token) {
+			var id = getQuery('productId');
+			var count = $('.inputer input').val() * 1;
+			addCookies('token', token);
+			var ids = getCookies('productId').split(',').filter(function (ele) {
+				return ele !== '';
+			});
+			var counts = getCookies('productQuantity').split(',').filter(function (ele) {
+				return ele !== '';
+			});
+			var index = ids.indexOf(id);
+			if (index >= 0) {
+				counts[index] = counts[index] * 1 + count;
+			} else {
+				ids.push(id);
+				counts.push(count);
+			}
+			addCookies('productId', ids.join(','));
+			addCookies('productQuantity', counts.join(','));
+			window.location.reload();
+		}
 	});
 }
 

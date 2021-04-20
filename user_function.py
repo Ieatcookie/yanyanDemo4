@@ -11,22 +11,39 @@ from flask import Flask, request, jsonify
 from db import *
 import jwt
 import smtplib
+import socket
 from email import encoders 
 from email.header import Header 
 from email.mime.text import MIMEText 
 from email.utils import parseaddr 
 from email.utils import formataddr 
 
-# from flask_mail import Mail, Message
-users = []
-online = []
 
 
 def print_email():
     users = User.query.all()
     for u in users:
         print(u.email)
+def good_password(password):
+    decimal = 0
+    lower = 0
+    higher = 0
+    length = 0
+    for i in password:
+        x = ord(i)
+        length = length + 1
+        if x >= ord('0') and x <= ord('9') :
+            decimal = decimal + 1
+        elif x >= ord('a') and x <= ord('z'):
+            lower = lower + 1
+        elif x >= ord('A') and x <= ord('Z') :
+            higher = higher + 1 
 
+    if length < 5 or length > 50:
+        return False
+    if lower == 0 or higher == 0 or decimal == 0:
+        return False
+    return True
 #####################################################################################
 #                                                                                   #
 #                               AUTHENTICATION FUNCTIONS                            #
@@ -47,10 +64,8 @@ def register(nickname, email, password, repeat_password, mobile):
         return dumps({"result": "ERROR", "reason": "email already registered"})
     elif result == 0:
         return dumps({"result": "ERROR", "reason": "Invalid email"})
-    if len(password) < 5 or len(password) > 50:
-        return dumps({"result": "ERROR", "reason": "password's length must be between 5- 50 characters."})
-    if len(nickname) < 1 or len(nickname) > 50:
-        return dumps({"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."})
+    if good_password(password) == False:
+        return dumps({"result": "ERROR", "reason": "password must be between 5 and 50 characters, and contains number, capital letter and lower case letter."})
     if password != repeat_password:
         return dumps({"result": "ERROR", "reason": "password not match with repeat password"})
 
@@ -103,7 +118,7 @@ def auth_logout(token, user):
         return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
     if user.state == 2:  # If user is already logged out
         return dumps({"result": "ERROR", "reason": "user is already logged out"})
-    user.state = 2  # Changing the user's state to logged out
+    user.is_online = False  # Changing the user's state to logged out
     return dumps({"result": "success"})
 
 
@@ -136,23 +151,19 @@ def find_pic_by_keywork(keyword, token):
     return dumps({"products": product_dicts})
 
 # @app.route('/', methods=["GET"])  # this actually cannot work now
-def auth_passwordreset_request(em):
+def auth_passwordreset_request(token):
     # email = str(request.args.get("email"))
-    result = valid_email(em)
-    print(result)
-    if result == 1:
-        return dumps({"result": "ERROR", "reason": "Email is not registered."})
-    elif result == 0:
-        return dumps({"result": "ERROR", "reason": "Invalid Email."})
-    # Finding u_id associated with token
-    user = User.query.filter_by(email=em).first()
+    user = User.query.filter_by(token = token).first()
+    if user == None:
+        return dumps({"result": "ERROR", "reason": "can't find user with token."})
     reset_code = gen_reset_code()
 
     # Sending reset code to user by email
     # N: If this errors, this will be picked up by the error handler and an error will be shown
-    msg = "Five Pedals RESET PASSWORD\n\n\nYou've requested to reset your password. Your reset code is : " + reset_code + "."
-    send_email(em, msg)
-    return dumps({"resetcode": reset_code})
+    msg = "Five Pedals RESET PASSWORD\n\n\nYou've requested to reset your password. Your reset code is : \n" + str(reset_code)
+    create_Reset_Code(user.U_id, reset_code)
+    send_email(msg, "Phranqueli@gmail.com")
+    return dumps({"status": "success"})
 
 
 def valid_email(em):
@@ -183,69 +194,6 @@ def gen_reset_code():
     return reset_code
 
 
-def send_email(receiver_email, message):
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        server.login("liyun8185@126.com", "123456")
-        server.sendmail("liyun8185@126.com", receiver_email, message)
-
-
-def update_nickname(check_token, new_nickname):
-    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
-    if user is None:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
-    if len(new_nickname) < 1 or len(new_nickname) > 50:
-        return dumps({"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."})
-    user.nickname = new_nickname
-    db.session.commit()
-    dumps({"result": "success"})
-
-def update_address(check_token, new_address):
-    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
-    if user is None:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
-    user.address = new_address
-    db.session.commit()
-    dumps({"result": "success"})
-
-
-def update_mobile(check_token, new_mobile):
-    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
-    if user is None:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
-    if new_mobile.isdecimal() == False:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
-    user.mobile = new_mobile
-    db.session.commit()
-    dumps({"result": "success"})
-
-
-def update_email(check_token, new_email):
-    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
-    if user is None:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
-    result = valid_email(new_email)
-    if result == -1:
-        return dumps({"result": "ERROR", "reason": "email already registered"})
-    elif result == 0:
-        return dumps({"result": "ERROR", "reason": "Invalid email"})
-    user.email = new_email
-    db.session.commit()
-    dumps({"result": "success"})
-
-
-def update_mobile(check_token, new_mobile):
-    user = User.query.filter(User.token == check_token).first()  # Finding user for given token
-    if user is None:  # If there is no user corresponding to token
-        return dumps({"is_success": False, "reason": "there is no user corresponding to token"})
-    """""
-    if user.is_online == 2:  # If user is already logged out
-        return dumps({"is_success": False, "reason": "user is already logged out"})
-    """""
-    user.mobile = new_mobile
-    db.session.commit()
-
-
 # this method needs to add token in the future
 def get_product_information_by_category(categories):
     products = Product.query.all()
@@ -260,6 +208,8 @@ def get_product_information_by_category(categories):
 
 
 def include_category(product, categories):
+    if categories == '' or  categories == ',':
+        return True
     int_to_cate = {
         '1': "Love flowers",
         '2': "Friendship flowers",
@@ -268,7 +218,8 @@ def include_category(product, categories):
         '5': "Repay the teacher",
         '6': "Visiting and condolences",
         '7': "Apology flowers",
-        '8': "Wedding flowers"
+        '8': "Wedding flowers",
+        '9': "Congratulations flowers"
     }
     cs = categories.split(",")
     pcs = product.tags.split(",")
@@ -337,18 +288,27 @@ def format_addr(s):
     return formataddr((Header(name, "utf-8").encode(), addr))
 
 def send_email(content, reciever_email):
-    from_email = "liyun8185@126.com"
-    from_email_pwd = "123456"
-    smtp_server = "smtp.126.com"  
+    from_email = "w17a.credible4@gmail.com"
+    from_email_pwd = "Frank19981229"
+    smtp_server = "smtp.gmail.com"  
     msg = MIMEText("<html><body><h3>hello</h3><p>" + content + "</p></body></html>", "html", "utf-8")
     msg["From"] = format_addr("%s" %(from_email))
     msg["To"] = format_addr("%s" %(reciever_email))
     msg["Subject"] = Header("python email", "utf-8").encode()
-    
-    server = smtplib.SMTP(smtp_server, 25)
+    socket.getaddrinfo('127.0.0.1', 5000)
+    '''server = smtplib.SMTP("smtp.gmail.com", 587, timeout=120)
     server.set_debuglevel(1)
     server.login(from_email, from_email_pwd)
     server.sendmail(from_email, [reciever_email], msg.as_string())
+    server.quit()'''
+    server = smtplib.SMTP('smtp.gmail.com', 25)
+    server.connect("smtp.gmail.com", 587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(from_email, from_email_pwd)
+    text = msg.as_string()
+    server.sendmail(from_email, reciever_email, content)
     server.quit()
 
 def admin_recommend():
@@ -420,13 +380,56 @@ def guess(token):
             fav_num = fav_num + num_search_to_favor(user.U_id, p.name, p.tags)
             p_favor[p] = fav_num
             i = i - 1
-        product_list = sorted(p_favor, key=p_favor.get, reverse=True)
+        product_list = sorted(p_favor, key=p_favor.get, reverse=True)[:20]
     dict_list = []
     for p in product_list:
         dict_list.append(product_to_dict(p))
-    return dict_list
-        
-        
-        
-        
+    return dumps({"products":dict_list})
 
+def check_reset(id, code):
+    if code == None :
+        return False
+    user_reset = Reset_code.query.filter_by(U_id = id).first()
+    reset = user_reset.reset_code
+    db.session.delete(user_reset)
+    db.session.commit()
+    if str(reset) != code:
+        return False
+    return True
+
+
+def edit_profile(email, password, nickname, token, mobile, reset_code):
+    user = User.query.filter_by(token = token).first()
+    if mobile.isdecimal() == False:  # If there is no user corresponding to token
+        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+    result = valid_email(email)
+    if result == -1:
+        return dumps({"result": "ERROR", "reason": "email already registered"})
+    if result == 0:
+        return dumps({"result": "ERROR", "reason": "Invalid email"})
+    if len(nickname) < 1 or len(nickname) > 50:
+        return dumps({"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."})   
+    user.nickname = nickname
+    user.mobile = mobile
+    db.session.commit()
+    if reset_code != None:
+        if check_reset(user.id, reset_code) == False:
+            return dumps({"result": "ERROR", "reason": "incorrect reset_code, please generate again."})
+        elif good_password(password) == False:
+            return dumps({"result": "ERROR", "reason": "password must be between 1 and 50 characters."})
+        user.email = email
+        user.password = hashpass(password)
+        db.session.commit()    
+    return dumps({"result": "success"})
+
+def users_orders(token):
+    user = User.query.filter_by(token = token).first()
+    if user == None:
+        return dumps({"result": "ERROR", "reason": "invalid token."})
+    orders = Order.query.all()
+    return_list = []
+    i = 0
+    for order in orders:
+        if order.U_id == user.U_id:
+            return_list.append(order_to_dict(order))
+    return dumps({"orders": return_list})

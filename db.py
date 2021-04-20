@@ -59,6 +59,14 @@ class Shopping_cart(db.Model):
         self.U_id = U_id
         self.P_id = P_id
 
+class Reset_code(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    U_id = db.Column(db.Integer, nullable=False)
+    reset_code = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, U_id, reset_code):
+        self.U_id = U_id
+        self.reset_code = reset_code
 
 class Click_history(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -184,6 +192,10 @@ def add_item(item):
 def create_user(id_number, token, nickname, online, em, passw, addre, mobile):
     new_user = User(id_number, token, nickname, online, em, passw, addre, mobile)
     add_item(new_user)
+
+def create_reset_Code(u_id, reset_code) :
+    new_reset_code = Reset_code(u_id, reset_code)
+    add_item(new_reset_code)
 
 def create_Click_history(U_id, p_id):
     new_ch = Click_history(U_id, p_id)

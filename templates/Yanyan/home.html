@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
-    <link rel="icon" href="../../static/img/favicon.png" />
+    <title>FiveBluePetals</title>
     <script type="text/javascript" src="../../static/jquery/jquery.min.js"></script>
     <style>
         body {
             margin: 0;
         }
-        .home-body {
-            background-image: url(img/background_pic.jpg);
-        }
         .title {
-            font-size: 25px;
-            color: pink;
+            font-size: 40px;
+            font-family:Times New Roman;
+            font-weight: bold;
+            font-style:Italic;
+            color: IndianRed;
             margin: 0;
             margin-left: 5%;
             margin-bottom: 20px;
@@ -52,6 +50,7 @@
             width: 100%;
             color: white;
             font-size: 30px;
+            font-family: Arial;
             text-align: center;
         }
 
@@ -76,7 +75,7 @@
             width: 100%;
             font-size: 0;
             font-family: 'helvetica neue',tahoma,'hiragino sans gb',stheiti,'wenquanyi micro hei',sans-serif;
-            border-top: 1px solid #f2f2f2;
+            border-top: 1px solid pink;
             border-left: 1px solid #f2f2f2;
         }
         ul {
@@ -185,12 +184,12 @@
         -webkit-text-size-adjust: 100%;
         text-size-adjust: 100%;
     }
-    @keyframes scaleDraw {  /*定义关键帧、scaleDrew是需要绑定到选择器的关键帧名称*/
+    @keyframes scaleDraw { 
                 0%{
-                    transform: scale(1);  /*开始为原始大小*/
+                    transform: scale(1);  
                 }
                 25%{
-                    transform: scale(1.1); /*放大1.1倍*/
+                    transform: scale(1.1);
                 }
                 50%{
                     transform: scale(1);
@@ -257,9 +256,10 @@
     .add-to-cart:hover {
         opacity: 1;
     }
+    
     </style>
 </head>
-<body class="home-body">
+<body class="home-body" bgcolor="PeachPuff">
 <!--script type="text/javascript" src="../../static/jquery/jquery.min.js"></script-->
 {% include "Common/header.html" %}
 <!-- <img src="/static/image/product_image/1/0.jpg" style="width: 100%;margin-bottom: 20px;" alt=""> -->
@@ -328,15 +328,13 @@ $(function () {
 });
 
 function getShopRecommend () {
-    // 这个是要写的商家推荐接口，返回的是商品列表
-    axios.post(window.location.origin + '/shop_recommend', Qs.stringify({
+    axios.post(window.location.origin + '/recommend', Qs.stringify({
 
     }), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
     }).then(function (res) {
-        // 获取接口返回的 products，如果接口返回的有错误，就默认没有 products 
         var products = res.data.products;
         if (res.data.reason) {
             products = [];
@@ -346,15 +344,13 @@ function getShopRecommend () {
 }
 
 function getYouLike (token) {
-    // 商家推荐接口，返回的是商品列表
-    axios.post(window.location.origin + '/you_like', Qs.stringify({
+    axios.post(window.location.origin + '/guess_you_like', Qs.stringify({
         token: token
     }), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
     }).then(function (res) {
-        // 获取接口返回的 products，如果接口返回的有错误，就默认没有 products 
         var products = res.data.products;
         if (res.data.reason) {
             products = [];
@@ -375,7 +371,7 @@ function renderProducts (products, className) {
         li.find('.coupon-price-afterCoupon').text('$' + (product.price - product.discount));
         li.find('.coupon-price-old').text('$' + product.price);
         li.find('.sell-info').text(product.usage.join(' | '));
-        if (product.stock <= 500) {
+        if (product.stock <= 0) {
             li.addClass('no-stock');
             li.find('.add-container').remove();
         }

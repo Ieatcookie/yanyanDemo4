@@ -14,10 +14,6 @@ def login():
 def register():
     return render_template("/Yanyan/register.html")
 
-@app.route('/sort_all_product',methods=['POST'])
-def sort_all_product():
-    return sort_by_stock()
-
 @app.route('/shop',methods=['GET'])
 def shop():
     return render_template("/Yanyan/product.html")
@@ -30,10 +26,6 @@ def singleproduct():
 def category():
     return render_template("/Yanyan/category.html")
 
-@app.route('/collection',methods=['GET'])
-def collection():
-    return render_template("/Yanyan/collection.html")
-
 @app.route('/mine',methods=['GET'])
 def mine():
     return render_template("/Yanyan/mine.html")
@@ -42,3 +34,10 @@ def mine():
 def cart():
     return render_template("/Yanyan/cart.html")
 
+@app.route('/aboutUs',methods=['GET'])
+def aboutUs():
+    return render_template("/Yanyan/aboutUs.html")
+
+@app.route('/myOrders',methods=['GET'])
+def myOrders():
+    return render_template("/Yanyan/myOrders.html")

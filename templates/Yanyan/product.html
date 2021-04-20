@@ -5,8 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop</title>
-    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
-    <link rel="icon" href="../../static/img/favicon.png" />
 </head>
 <style>
     .laut-main {
@@ -14,7 +12,8 @@
         position: relative;
     }
     .collection-list {
-        width: 90%;
+        width: 1100px;
+        text-align: center;
         margin: 10% auto;
     }
 
@@ -45,48 +44,79 @@
         margin-bottom: 20px;
     }
 
-    .filters select {
-        outline: none;
-        width: 120px;
-        height: 30px;
-        border-radius: 4px;
-        padding: 0 5px;
+    .filters .filter {
         border: 1px solid #409EFF;
+        width: 100px;
+        box-sizing: border-box;
+        height: 30px;
+        line-height: 26px;
         color: #303333;
         font-synthesis: 16px;
-    }
-
-    .filters select:hover {
-        background-color: #409EFF;
-        opacity: 0.6;
-        color: white;
-    }
-
-    .filters .sort {
-        width: 120px;
-        height: 30px;
-        box-sizing: border-box;
         border-radius: 4px;
+        cursor: pointer;
         position: relative;
-        top: 1px;
+        text-align: left;
+        padding-left: 20px;
+        display: inline-block;
+        margin-right: 20px;
+        user-select: none;
+    }
+    .filters .filter .top {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid #aaa;
+    }
+    .filters .filter .bottom {
+        position: absolute;
+        right: 10px;
+        bottom: 5px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid #aaa;
+    }
+    .filters .filter .top.active {
+        border-bottom: 8px solid #409EFF;
+    }
+    .filters .filter .bottom.active {
+        border-top: 8px solid #409EFF;
+    }
+
+    #category {
+        height: 30px;
+        line-height: 30px;
         display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        margin: 0 10px;
         border: 1px solid #409EFF;
+        border-radius: 4px;
+        margin-bottom: 20px;
         cursor: pointer;
     }
-
-    .filters .sort span {
-        flex: 1;
-        height: 30px;
-        line-height: 28px;
+    #category span {
+        font-size: 12px;
+        padding: 0 10px;
+        border-left: 1px solid #409EFF;
     }
-
-    .filters .sort span.active {
+    #category span:first-child {
+        border-left: none;
+    }
+    #category span:hover, #category span.selected {
         background-color: #409EFF;
         color: white;
+    }
+    #minPrice, #maxPrice {
+        width: 80px;
+        height: 25px;
+        line-height: 25px;
+        outline: none;
+        padding-left: 10px;
+        border: 1px solid #409EFF;
+        border-radius: 4px;
     }
 
     .collection-list .pagination {
@@ -168,7 +198,7 @@
        padding: 0;
     }
     .pc-search-items-list .pc-items-item {
-        width: 236px;
+        width: 260px;
         height: 368px;
         box-sizing: border-box;
         display: inline-block;
@@ -361,16 +391,44 @@ li:hover .add-container {
     </div>
     
     <div class="collection-list">
+        <div id="category" >
+            <span data-value="1">Love flowers</span>
+            <span data-value="2">Friendship flowers</span>
+            <span data-value="3">Birthday flowers</span>
+            <span data-value="4">Greeting flowers</span>
+            <span data-value="5">Repaythe teacher</span>
+            <span data-value="6">Visitingand condolences</span>
+            <span data-value="7">Apology flowers</span>
+            <span data-value="8">Wedding flowers</span>
+        </div>
         <div class="filters">
-            <select id="filter">
-                <option selected label="price">price</option>
-                <option label="title">title</option>
-                <option label="stock">stock</option>
-            </select>
-            <div class="sort">
-                <span class="asc">asc</span>
-                <span class="desc">desc</span>
+            <div class="filter">
+                <span>price</span>
+                <div class="arrows">
+                    <span class="top"></span>
+                    <span class="bottom"></span>
+                </div>
             </div>
+            <div class="filter">
+                <span>title</span>
+                <div class="arrows">
+                    <span class="top"></span>
+                    <span class="bottom"></span>
+                </div>
+            </div>
+            <div class="filter">
+                <span>stock</span>
+                <div class="arrows">
+                    <span class="top"></span>
+                    <span class="bottom"></span>
+                </div>
+            </div>
+            <span class="price">
+                <span>Lower Bound：</span>
+                <input type="number" id="minPrice" min="0">
+                <span>Higher Bound：</span>
+                <input type="number" id="maxPrice" min="0">
+            </span>
         </div>
 
         <ul class="pc-search-items-list"></ul>
@@ -411,13 +469,54 @@ li:hover .add-container {
 
 var data = { };
 var page = 1;
-var size = 10;
+var size = 16;
 var total = 0;
 var numPages = 0;
+var categories = [];
 
 
 $(function () {
     getProducts();
+
+    var lastFilter = null;
+    $('.filters .filter').click(function () {
+        var text = $(this).text().trim();
+        if (lastFilter !== text) {
+            $(this).data('sort', '');
+        }
+        lastFilter = text;
+
+        var sort = $(this).data('sort') || 'none';
+        $('.filters').find('.active').removeClass('active');
+        if (sort === 'asc') {
+            sort = 'desc';
+            $(this).find('.bottom').addClass('active');
+        } else if (sort === 'desc') {
+            sort = 'none';
+        } else {
+            sort = 'asc';
+            $(this).find('.top').addClass('active');
+        }
+        $(this).data('sort', sort);
+        filterProducts();
+    });
+
+    $('#category span').click(function () {
+        var number = $(this).attr('data-value');
+        if (categories.includes(number)) {
+            $(this).removeClass('selected');
+            categories = categories.filter(function (value) {
+                return value !== number;
+            });
+        } else {
+            categories.push(number);
+            $(this).addClass('selected');
+        }
+        filterProducts();
+    });
+
+    $('#minPrice').change(filterProducts);
+    $('#maxPrice').change(filterProducts);
 
     $('#keyword').change(function () {
         var keyword = $(this).val().trim();
@@ -441,26 +540,29 @@ $(function () {
             renderPageProducts();
         }
     });
-
-    $('#filter').change(function () {
-        sortProducts();
-    });
-    $('.filters .asc').click(function () {
-        $('.filters .sort span').removeClass('active');
-        $(this).addClass('active');
-        sortProducts();
-    });
-    $('.filters .desc').click(function () {
-        $('.filters .sort span').removeClass('active');
-        $(this).addClass('active');
-        sortProducts();
-    });
 });
 
-function sortProducts () {
-    var filter = $('#filter').val();
-    var sort = $('.filters .sort .active').text();
-    var id = '';
+function filterProducts () {
+    var categoryStr = categories.join(',');
+    var minPrice = $('#minPrice').val() * 1;
+    var maxPrice = $('#maxPrice').val() * 1;
+    if (minPrice < 0) {
+        minPrice = 0;
+    }
+    if (maxPrice < 0) {
+        maxPrice = 0;
+    }
+    var activeSort = $('.filters .active');
+    var filter = activeSort.parent().parent().text().trim();
+    var sort = 'none';
+    if (activeSort.hasClass('top')) {
+        sort = 'asc';
+    } else if (activeSort.hasClass('bottom')) {
+        sort = 'desc';
+    }
+    console.log(filter, sort)
+    var id = -1;
+
     switch (true) {
         case filter === 'title' && sort === 'asc': id = 1;break;
         case filter === 'title' && sort === 'desc': id = 2;break;
@@ -469,36 +571,24 @@ function sortProducts () {
         case filter === 'stock' && sort === 'asc': id = 5;break;
         case filter === 'stock' && sort === 'desc': id = 6;break;
     }
-    axios.post(window.location.origin + '/sort_all_product', Qs.stringify({
-        id: id
-    }), {
+    var params = {
+        id: id,
+        categories: categoryStr,
+        lower_bound: minPrice || -1,
+        higher_bound: maxPrice || 100000
+    };
+    console.log(params)
+    axios.post(window.location.origin + '/sort_all_products', Qs.stringify(params), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
     }).then(function (res) {
-        console.log('00000000000000')
-        console.log(res);
-        console.log(res.data.products.map(e => e[filter]))
         data = res.data;
         total = data.products.length;
         numPages = Math.ceil(total / size);
         initPagination();
         renderPageProducts();
     });
-    // data.products.sort(function (a, b) {
-    //     if (typeof a[filter] === 'number') {
-    //         if (sort === 'asc') {
-    //             return a[filter] - b[filter];
-    //         }
-    //         return b[filter] - a[filter];
-    //     } else {
-    //         if (sort === 'asc') {
-    //             return a[filter].localeCompare(b[filter]);
-    //         }
-    //         return b[filter].localeCompare(a[filter]);
-    //     }
-    // });
-    // page = 1;
     renderPageProducts();
 }
 
@@ -511,19 +601,6 @@ function getProducts () {
         initPagination();
         renderPageProducts();
     });
-}
-
-// function searchProducts () {
-//     axios.post(window.location.origin + '/customer_search', Qs.stringify({
-//         keyword: '1'
-//     }), {
-//         headers: {
-//             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-//         }
-//     }).then(function (res) {
-//         console.log(res)
-//     });
-// }
 
 function renderProducts (products) {
     var ul = $('.pc-search-items-list');

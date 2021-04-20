@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type=text/javascript src="{{url_for('static', filename='js/script.js') }}"></script>
+
     <title>Shop</title>
-    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
-    <link rel="icon" href="../../static/img/favicon.png" />
+
 </head>
 <style>
     .laut-main {
@@ -15,6 +16,7 @@
     }
     .collection-list {
         width: 90%;
+        min-width: 1200px; 
         margin: 10% auto;
     }
 
@@ -94,7 +96,7 @@
         height: 366px;
         box-sizing: border-box;
         padding: 22px 20px 0;
-        background: #fff;
+        background: white;
         position: relative;
     }
     .pc-search-items-list img {
@@ -287,15 +289,13 @@ $(function () {
 
 function getProducts () {
     var category = getQuery('name');
-    // 这个是要写的接口，返回的是商品列表
     axios.post(window.location.origin + '/collections', Qs.stringify({
         category: category
     }), {
         headers: {
             'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
-    }).then(function (res) {
-        // 获取接口返回的 products，如果接口返回的有错误，就默认没有 products 
+    }).then(function (res) { 
         var products = res.data.products;
         if (res.data.reason) {
             products = [];
@@ -305,7 +305,7 @@ function getProducts () {
 }
 
 function renderProducts (products) {
-    // 清空现在展示的花的列表
+    // clear all flower list
     var ul = $('.pc-search-items-list');
     ul.html('');
     var template = $('.product-template');
@@ -317,7 +317,7 @@ function renderProducts (products) {
         li.find('.coupon-price-afterCoupon').text('$' + (product.price - product.discount));
         li.find('.coupon-price-old').text('$' + product.price);
         li.find('.sell-info').text(product.usage.join(' | '));
-        if (product.stock <= 500) {
+        if (product.stock <= 0) {
             li.addClass('no-stock');
             li.find('.add-container').remove();
         }

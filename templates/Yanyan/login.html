@@ -142,7 +142,27 @@
                     if (res.data.token) {
                         window.sessionStorage.setItem('token', res.data.token);
                         window.sessionStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
-                        window.location.href = window.location.origin;
+
+                        console.log('1111111111')
+                        try {
+                            var cart = JSON.parse(window.sessionStorage.getItem('cart'));
+                            window.sessionStorage.removeItem('cart');
+                            if (cart.id) {
+                                axios.post(window.location.origin + '/add_to_cart', Qs.stringify({
+                                    id: cart.id,
+                                    count: cart.count,
+                                    token: res.data.token
+                                }), {
+                                    headers: {
+                                        'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+                                    }
+                                }).then(function (res) {
+                                    window.location.href = window.location.origin;
+                                });
+                            }
+                        } catch (e) {
+                            window.location.href = window.location.origin;
+                        };
                     } else {
                         alert(res.data.reason);
                     }
