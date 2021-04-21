@@ -139,7 +139,7 @@
         <input type="text" class="inputer" id="password" placeholder="enter new password">
     </div>
     <div class = warning>
-        You can only edit emmail when captcha is correct.
+        You can only edit email when captcha is correct.
     </div> 
 
     <div class="operation">
@@ -189,10 +189,11 @@ $(function () {
                 if (res.data.reason) {
                     alert(res.data.reason);
                 } else {
+                    var userInfo = Object.assign({}, user, params);
+                    window.sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
                     alert('update profile success');
                     setTimeout(function () {
                         window.location.reload();
-                        
                     }, 2000);
                 }
             });
