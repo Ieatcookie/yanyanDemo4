@@ -105,6 +105,11 @@
             opacity: 0.5;
             color: white;
         }
+        .warning{
+            color:grey;
+            font-family:Arial;
+            text-align:right;
+        }
     </style>
 </head>
 <body class="home-body">
@@ -133,6 +138,10 @@
         <span class="value"></span>
         <input type="text" class="inputer" id="password" placeholder="enter new password">
     </div>
+    <div class = warning>
+        You can only edit emmail when captcha is correct.
+    </div> 
+
     <div class="operation">
         <div class="edit">Edit profile</div>        
         <div class="cancel">Cancel</div>        
@@ -169,14 +178,10 @@ $(function () {
                 var input = $('#' + key);
                 params[key] = input.val();
             }
-            console.log(params)
-            console.log('0000000000000')
             var user = JSON.parse(window.sessionStorage.getItem('userInfo') || 'null');
             var userId = user.id;
-            axios.post(window.location.origin + '/update_profile?userId=' + userId, Qs.stringify({
-                params: params,
-                token: window.sessionStorage.getItem('token')
-                }), {
+            params.token = window.sessionStorage.getItem('token');
+            axios.post(window.location.origin + '/update_profile?userId=' + userId, Qs.stringify(params), {
                 headers: {
                     'content-type': 'application/x-www-form-urlencoded;charset=utf-8'
                 }
@@ -187,6 +192,7 @@ $(function () {
                     alert('update profile success');
                     setTimeout(function () {
                         window.location.reload();
+                        
                     }, 2000);
                 }
             });

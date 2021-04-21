@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <script type=text/javascript src="{{url_for('static', filename='js/script.js') }}"></script>
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop</title>
+    <!--link rel="stylesheet" href="../../static/layui/css/layui.css"-->
+    <link rel="icon" href="../../static/img/favicon.png" />
 </head>
 <style>
     .laut-main {
@@ -396,8 +400,8 @@ li:hover .add-container {
             <span data-value="2">Friendship flowers</span>
             <span data-value="3">Birthday flowers</span>
             <span data-value="4">Greeting flowers</span>
-            <span data-value="5">Repaythe teacher</span>
-            <span data-value="6">Visitingand condolences</span>
+            <span data-value="5">Repay the teacher</span>
+            <span data-value="6">Visiting and condolences</span>
             <span data-value="7">Apology flowers</span>
             <span data-value="8">Wedding flowers</span>
         </div>
@@ -417,7 +421,7 @@ li:hover .add-container {
                 </div>
             </div>
             <div class="filter">
-                <span>stock</span>
+                <span>sales</span>
                 <div class="arrows">
                     <span class="top"></span>
                     <span class="bottom"></span>
@@ -561,7 +565,7 @@ function filterProducts () {
         sort = 'desc';
     }
     console.log(filter, sort)
-    var id = -1;
+    var id = 0;
 
     switch (true) {
         case filter === 'title' && sort === 'asc': id = 1;break;
@@ -570,6 +574,7 @@ function filterProducts () {
         case filter === 'price' && sort === 'desc': id = 3;break;
         case filter === 'stock' && sort === 'asc': id = 5;break;
         case filter === 'stock' && sort === 'desc': id = 6;break;
+
     }
     var params = {
         id: id,
@@ -601,6 +606,7 @@ function getProducts () {
         initPagination();
         renderPageProducts();
     });
+}
 
 function renderProducts (products) {
     var ul = $('.pc-search-items-list');

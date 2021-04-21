@@ -15,10 +15,8 @@ import socket
 from email import encoders 
 from email.header import Header 
 from email.mime.text import MIMEText 
-from email.utils import parseaddr 
-from email.utils import formataddr 
-
-
+from email.utils import parseaddr
+from email.utils import formataddr
 
 def print_email():
     users = User.query.all()
@@ -32,11 +30,11 @@ def good_password(password):
     for i in password:
         x = ord(i)
         length = length + 1
-        if x >= ord('0') and x <= ord('9') :
+        if x >= ord('0') and x <= ord('9'):
             decimal = decimal + 1
         elif x >= ord('a') and x <= ord('z'):
             lower = lower + 1
-        elif x >= ord('A') and x <= ord('Z') :
+        elif x >= ord('A') and x <= ord('Z'):
             higher = higher + 1 
 
     if length < 5 or length > 50:
@@ -61,13 +59,13 @@ def register(nickname, email, password, repeat_password, mobile):
     result = valid_email(email)
     print_email()
     if result == -1:
-        return dumps({"result": "ERROR", "reason": "email already registered"})
+        return {"result": "ERROR", "reason": "email already registered"}
     elif result == 0:
-        return dumps({"result": "ERROR", "reason": "Invalid email"})
+        return {"result": "ERROR", "reason": "Invalid email"}
     if good_password(password) == False:
-        return dumps({"result": "ERROR", "reason": "password must be between 5 and 50 characters, and contains number, capital letter and lower case letter."})
+        return {"result": "ERROR", "reason": "nickname must be between 5 and 50 characters, and contains number, capital letter and lower case letter."}
     if password != repeat_password:
-        return dumps({"result": "ERROR", "reason": "password not match with repeat password"})
+        return {"result": "ERROR", "reason": "password not match with repeat password"}
 
     password = hashpass(password)  # Hashing the password for storage
 
@@ -80,9 +78,9 @@ def register(nickname, email, password, repeat_password, mobile):
     fivebluepetals\n\n\n 
     Hi dear """ + nickname + """.\nThanks for registering in fivebluepetals.com\n
     It's a confirmation that you registered successfully\n"""
-    send_email(message, email)
+    #send_email(message, email)
     userr = u_id
-    return dumps({"customer": {'nickname': nickname, 'email': email, 'token': token}})
+    return {"customer": {'nickname': nickname, 'email': email, 'token': token}}
 
 
 def auth_login(em, input_password):
@@ -90,36 +88,36 @@ def auth_login(em, input_password):
     result = valid_email(em)
     print(result)
     if result == 1:
-        return dumps({"result": "ERROR", "reason": "Email is not registered."})
+        return {"result": "ERROR", "reason": "Email is not registered."}
     elif result == 0:
-        return dumps({"result": "ERROR", "reason": "Invalid Email."})
+        return {"result": "ERROR", "reason": "Invalid Email."}
     # Finding u_id associated with token
     user = User.query.filter_by(email=em).first()
 
     # Checking matching passwords
     input_password = hashpass(input_password)
     if input_password != user.password:
-        return dumps({"result": "ERROR", "reason": "Password is incorrect."})
+        return {"result": "ERROR", "reason": "Password is incorrect."}
 
     user.is_online = True  # Setting state to logged in
     db.session.commit()
-    return dumps({"token": user.token, "userInfo": {
+    return {"token": user.token, "userInfo": {
         "name": user.nickname,
         "id": user.U_id,
         "mobile":user.mobile,
         "password":user.password,
         "email":user.email
-    }})
+    }}
 
 
 def auth_logout(token, user):
     user = user = User.query.filter_by(token=token)  # Finding user for given token
     if user is None:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+        return {"result": "ERROR", "reason": "there is no user corresponding to token"}
     if user.state == 2:  # If user is already logged out
-        return dumps({"result": "ERROR", "reason": "user is already logged out"})
+        return {"result": "ERROR", "reason": "user is already logged out"}
     user.is_online = False  # Changing the user's state to logged out
-    return dumps({"result": "success"})
+    return {"result": "success"}
 
 
 def find_pic_by_category(category):
@@ -133,7 +131,7 @@ def find_pic_by_category(category):
     for p in list_of_pro:
         products.append(product_to_dict(p))
     
-    return dumps({"products": products})
+    return {"products": products}
 
 
 def find_pic_by_keywork(keyword, token):
@@ -148,14 +146,14 @@ def find_pic_by_keywork(keyword, token):
     product_dicts = []
     for p in list_of_id:
         product_dicts.append(product_to_dict(p))
-    return dumps({"products": product_dicts})
+    return {"products": product_dicts}
 
 # @app.route('/', methods=["GET"])  # this actually cannot work now
 def auth_passwordreset_request(token):
     # email = str(request.args.get("email"))
     user = User.query.filter_by(token = token).first()
     if user == None:
-        return dumps({"result": "ERROR", "reason": "can't find user with token."})
+        return {"result": "ERROR", "reason": "can't find user with token."}
     reset_code = gen_reset_code()
 
     # Sending reset code to user by email
@@ -163,7 +161,7 @@ def auth_passwordreset_request(token):
     msg = "Five Pedals RESET PASSWORD\n\n\nYou've requested to reset your password. Your reset code is : \n" + str(reset_code)
     create_Reset_Code(user.U_id, reset_code)
     send_email(msg, "Phranqueli@gmail.com")
-    return dumps({"status": "success"})
+    return {"status": "success"}
 
 
 def valid_email(em):
@@ -204,7 +202,7 @@ def get_product_information_by_category(categories):
     product_dicts = []
     for i in return_list1:
         product_dicts.append(product_to_dict(i))
-    return dumps({"products": product_dicts})
+    return {"products": product_dicts}
 
 
 def include_category(product, categories):
@@ -218,8 +216,7 @@ def include_category(product, categories):
         '5': "Repay the teacher",
         '6': "Visiting and condolences",
         '7': "Apology flowers",
-        '8': "Wedding flowers",
-        '9': "Congratulations flowers"
+        '8': "Wedding flowers"
     }
     cs = categories.split(",")
     pcs = product.tags.split(",")
@@ -244,7 +241,9 @@ def sort_by_case(case, low, high, categories):
     products = []
     prods = []
     if high < low:
-        return dumps({"result": "ERROR", "reason": "the upper bond should be lower than lower bound."})
+        return {"result": "ERROR", "reason": "the upper bond should be lower than lower bound."}
+    if case == 0:
+        products = Product.query.all()
     if case == 1:
         products = Product.query.order_by(Product.name, Product.stock).all()
     if case == 2:  
@@ -255,14 +254,14 @@ def sort_by_case(case, low, high, categories):
         products = Product.query.order_by(Product.price, Product.stock).all()
     if case == 5:  
         products = Product.query.order_by(Product.stock, Product.price.desc()).all()
-    if case == 6:  
+    if case == 6:
         products = Product.query.order_by(Product.stock.desc(), Product.price.desc()).all()
     if case > 6 or case < 0:
-        return dumps({"result": "ERROR", "reason": "Number is not valid."})
+        return {"result": "ERROR", "reason": "Number is not valid."}
     for i in products:
         if i.if_shown == True and high >= i.price and low <= i.price and include_category(i, categories) is True:
             prods.append(product_to_dict(i))
-    return dumps({"products": prods})
+    return {"products": prods}
 
 def get_all():
     return_list1 = []
@@ -270,7 +269,7 @@ def get_all():
     for p in prods:
         return_list1.append(p)
     product_dicts=[product_to_dict(i) for i in return_list1]
-    return dumps({"products":product_dicts}) 
+    return {"products":product_dicts} 
 
 
 def get_prod_by_id(ID, token):
@@ -281,7 +280,7 @@ def get_prod_by_id(ID, token):
         c_h = Click_history.query.filter_by(U_id = user.U_id, P_id = id).first()
         if c_h == None:
             create_Click_history(user.U_id, id)
-    return dumps({"products": [product_to_dict(Product.query.filter_by(pro_id = id).all()[0])]})
+    return {"products": [product_to_dict(Product.query.filter_by(pro_id = id).all()[0])]}
 
 def format_addr(s):
     name, addr = parseaddr(s)
@@ -320,8 +319,8 @@ def add_to_cart(productINFO):
     quant = int(id_quant[1])
     product = Product.query.filter_by(pro_id = id).first()
     if product.stock < quant:
-        return dumps({"result": "ERROR", "reason": "not enough stock"})
-    return dumps({"result": "success"})
+        return {"result": "ERROR", "reason": "not enough stock"}
+    return {"result": "success"}
 
 
 def if_user_viewed(U_id, P_id):
@@ -384,7 +383,7 @@ def guess(token):
     dict_list = []
     for p in product_list:
         dict_list.append(product_to_dict(p))
-    return dumps({"products":dict_list})
+    return {"products":dict_list}
 
 def check_reset(id, code):
     if code == None :
@@ -401,35 +400,40 @@ def check_reset(id, code):
 def edit_profile(email, password, nickname, token, mobile, reset_code):
     user = User.query.filter_by(token = token).first()
     if mobile.isdecimal() == False:  # If there is no user corresponding to token
-        return dumps({"result": "ERROR", "reason": "there is no user corresponding to token"})
+        return {"result": "ERROR", "reason": "there is no user corresponding to token"}
     result = valid_email(email)
-    if result == -1:
-        return dumps({"result": "ERROR", "reason": "email already registered"})
     if result == 0:
-        return dumps({"result": "ERROR", "reason": "Invalid email"})
+        return {"result": "ERROR", "reason": "Invalid email"}
     if len(nickname) < 1 or len(nickname) > 50:
-        return dumps({"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."})   
+        return {"result": "ERROR", "reason": "nickname must be between 1 and 50 characters."}   
     user.nickname = nickname
     user.mobile = mobile
     db.session.commit()
     if reset_code != None:
         if check_reset(user.id, reset_code) == False:
-            return dumps({"result": "ERROR", "reason": "incorrect reset_code, please generate again."})
+            return {"result": "ERROR", "reason": "incorrect reset_code, please generate again."}
         elif good_password(password) == False:
-            return dumps({"result": "ERROR", "reason": "password must be between 1 and 50 characters."})
+            return {"result": "ERROR", "reason": "password must be between 1 and 50 characters."}
         user.email = email
         user.password = hashpass(password)
         db.session.commit()    
-    return dumps({"result": "success"})
+    return {"result": "success"}
 
 def users_orders(token):
+    if token == None:
+        return {"result": "ERROR", "reason": "invalid token."}
     user = User.query.filter_by(token = token).first()
     if user == None:
-        return dumps({"result": "ERROR", "reason": "invalid token."})
+        return {"result": "ERROR", "reason": "invalid token."}
     orders = Order.query.all()
     return_list = []
     i = 0
     for order in orders:
         if order.U_id == user.U_id:
             return_list.append(order_to_dict(order))
-    return dumps({"orders": return_list})
+    return {"orders": return_list}
+        
+        
+        
+        
+

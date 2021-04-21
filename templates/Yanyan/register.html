@@ -7,6 +7,7 @@
     <title>register</title>
     <link rel="stylesheet" href="../../static/layui/css/layui.css">
     <script type="text/javascript" src="../../static/layui/layui.js"></script>
+    <link rel="icon" href="../../static/img/favicon.png" />
     <style>
         .form-layout {
             position: relative;
@@ -75,6 +76,7 @@
 <script type="text/javascript" src="../../static/js/axios.min.js"></script>
 <script type="text/javascript" src="../../static/js/qs.min.js"></script>
 <div id="nav-bottom"></div>
+<script type="text/javascript">$("#nav-bottom").load("top.html");</script>
     <div class="form-layout">
         <div class="form-layout-sdsf">
             <form action="">
@@ -157,7 +159,7 @@
                 }
             }).then(function (res) {
                 if (res.data.customer && res.data.customer.token) {
-                    window.location.href = window.location.origin + '/shop';
+                    window.location.href = window.location.origin + '/login';
                 } else {
                     alert(res.data.reason);
                 }
